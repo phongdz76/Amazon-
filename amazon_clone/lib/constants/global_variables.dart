@@ -1,6 +1,8 @@
 // Import thư viện Material Design của Flutter để sử dụng các widget và màu sắc
 import 'package:flutter/material.dart';
 
+String uri = 'http://192.168.1.7:3000';
+
 /// Class chứa các biến toàn cục (constants) được sử dụng trong toàn bộ ứng dụng
 /// Giúp duy trì tính nhất quán về màu sắc và thiết kế trong app
 class GlobalVariables {
