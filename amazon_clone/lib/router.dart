@@ -1,4 +1,5 @@
 import 'package:amazon_clone/features/auth/screens/auth_screen.dart';
+import 'package:amazon_clone/features/home/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 
 Route<dynamic> generateRoute(RouteSettings routeSetting){
@@ -6,13 +7,18 @@ Route<dynamic> generateRoute(RouteSettings routeSetting){
      case AuthScreen.routeName:
       return MaterialPageRoute(
         settings: routeSetting,
-        builder: (context) => const AuthScreen(),
+        builder: (_) => const AuthScreen(),
       );
-     
+
+    case HomeScreen.routeName:
+      return MaterialPageRoute(
+        settings: routeSetting,
+        builder: (_) => const HomeScreen(),
+      );
       default:
       return MaterialPageRoute(
         settings: routeSetting,
-        builder: (context) => const Scaffold(
+        builder: (_) => const Scaffold(
           body: Center(
             child: Text('Page not found'),
           ),
