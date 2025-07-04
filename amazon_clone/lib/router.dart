@@ -19,7 +19,7 @@ Route<dynamic> generateRoute(RouteSettings routeSetting){
     case BottomBar.routeName:
       return MaterialPageRoute(
         settings: routeSetting,
-        builder: (_) => const HomeScreen(),
+        builder: (_) => const BottomBar(),
       );
       default:
       return MaterialPageRoute(
