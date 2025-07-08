@@ -40,6 +40,9 @@ dependencies:
   badges: ^3.1.2
   carousel_slider: ^5.1.1
   dotted_border: ^3.1.0
+  borders: ^0.4.2
+  bordered: ^0.2.1
+  file_picker: ^10.2.0
 
 dev_dependencies:
   flutter_test:
