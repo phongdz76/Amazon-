@@ -168,7 +168,10 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                CustomButton(text: 'Add Product', onTap: () {}),
+                CustomButton(
+                  text: 'Sell', 
+                  onTap: () {}
+                ),
               ],
             ),
           ),
