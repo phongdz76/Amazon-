@@ -31,7 +31,6 @@ class User {
     };
   }
 
-  // Create User object from Map
   factory User.fromMap(Map<String, dynamic> map) {
     return User(
       id: map['_id'] ?? '',
@@ -44,9 +43,8 @@ class User {
     );
   }
 
-  // Convert User object to JSON string
   String toJson() => json.encode(toMap());
 
-  // Create User object from JSON string
-  factory User.fromJson(String source) => User.fromMap(json.decode(source));
+  factory User.fromJson(String source) =>
+      User.fromMap(json.decode(source));
 }

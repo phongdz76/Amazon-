@@ -1,6 +1,7 @@
 const express = require('express');
 const authRouter = require('./routes/auth');
 const mognoose = require('mongoose');
+const adminRouter = require('./routes/admin');
 
 const PORT = 3000;
 const app = express();
@@ -8,6 +9,7 @@ const DB = "mongodb+srv://phongnguyen07062004:Chauchau8@cluster0.6hzwav2.mongodb
 
 app.use(express.json());
 app.use(authRouter);
+app.use(adminRouter);
 
 mognoose
 .connect(DB)
