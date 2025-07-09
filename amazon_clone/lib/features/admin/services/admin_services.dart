@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:amazon_clone/constants/error_handling.dart';
@@ -43,22 +44,86 @@ class AdminServices {
       );
 
       http.Response res = await http.post(
-            Uri.parse('$uri/admin/add-product'),
-            headers: {
-              'Content-Type': 'application/json; charset=UTF-8',
-              'x-auth-token': userProvider.user.token,
-            },
-            body: product.toJson(),
-          );
+        Uri.parse('$uri/admin/add-product'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'x-auth-token': userProvider.user.token,
+        },
+        body: product.toJson(),
+      );
 
-          httpErrorHand(
-            response: res, 
-            context: context, 
-            onSuccess: () {
-              showSnackBar(context, 'Product added successfully!');
-              Navigator.pop(context);
-            }
-          );
+      httpErrorHand(
+        response: res,
+        context: context,
+        onSuccess: () {
+          showSnackBar(context, 'Product added successfully!');
+          Navigator.pop(context);
+        },
+      );
+    } catch (e) {
+      showSnackBar(context, e.toString());
+    }
+  }
+
+  // get all the products
+  Future<List<Product>> fetchAllProducts(BuildContext context) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    List<Product> productList = [];
+    try {
+      http.Response res = await http.get(
+        Uri.parse('$uri/admin/get-products'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'x-auth-token': userProvider.user.token,
+        },
+      );
+
+      httpErrorHand(
+        response: res,
+        context: context,
+        onSuccess: () {
+          for (int i = 0; i < jsonDecode(res.body).length; i++) {
+            productList.add(
+              Product.fromJson(
+                jsonEncode(
+                  jsonDecode(res.body)[i],
+                ),
+              ),
+            );
+          }
+        },
+      );
+    } catch (e) {
+      showSnackBar(context, e.toString());
+    }
+    return productList;
+  }
+  
+  void deleteProduct({
+    required BuildContext context,
+    required Product product,
+    required VoidCallback onSuccess,
+  }) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    try {
+      http.Response res = await http.post(
+        Uri.parse('$uri/admin/delete-product'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'x-auth-token': userProvider.user.token,
+        },
+        body: jsonEncode({
+          'id': product.id,
+        }),
+      );
+
+      httpErrorHand(
+        response: res,
+        context: context,
+        onSuccess: () {
+          onSuccess();
+        },
+      );
     } catch (e) {
       showSnackBar(context, e.toString());
     }
