@@ -84,11 +84,7 @@ class AdminServices {
         onSuccess: () {
           for (int i = 0; i < jsonDecode(res.body).length; i++) {
             productList.add(
-              Product.fromJson(
-                jsonEncode(
-                  jsonDecode(res.body)[i],
-                ),
-              ),
+              Product.fromJson(jsonEncode(jsonDecode(res.body)[i])),
             );
           }
         },
@@ -98,7 +94,7 @@ class AdminServices {
     }
     return productList;
   }
-  
+
   void deleteProduct({
     required BuildContext context,
     required Product product,
@@ -112,9 +108,7 @@ class AdminServices {
           'Content-Type': 'application/json; charset=UTF-8',
           'x-auth-token': userProvider.user.token,
         },
-        body: jsonEncode({
-          'id': product.id,
-        }),
+        body: jsonEncode({'id': product.id}),
       );
 
       httpErrorHand(
@@ -122,6 +116,93 @@ class AdminServices {
         context: context,
         onSuccess: () {
           onSuccess();
+        },
+      );
+    } catch (e) {
+      showSnackBar(context, e.toString());
+    }
+  }
+
+  // Get single product by ID
+  Future<Product?> getProductById({
+    required BuildContext context,
+    required String productId,
+  }) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    try {
+      http.Response res = await http.get(
+        Uri.parse('$uri/admin/get-product/$productId'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'x-auth-token': userProvider.user.token,
+        },
+      );
+
+      if (res.statusCode == 200) {
+        return Product.fromJson(res.body);
+      }
+    } catch (e) {
+      showSnackBar(context, e.toString());
+    }
+    return null;
+  }
+
+  // Edit/Update product
+  Future<void> editProduct({
+    required BuildContext context,
+    required String productId,
+    required String name,
+    required String description,
+    required double price,
+    required double quantity,
+    required String category,
+    required List<File> newImages, // Ảnh mới được chọn
+    required List<String> existingImageUrls, // Ảnh cũ giữ lại
+  }) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    try {
+      List<String> finalImageUrls = List.from(existingImageUrls);
+
+      // Upload ảnh mới lên Cloudinary nếu có
+      if (newImages.isNotEmpty) {
+        final cloudinary = CloudinaryPublic('dardtagt3', 'amazon_cloudinary');
+
+        for (int i = 0; i < newImages.length; i++) {
+          CloudinaryResponse res = await cloudinary.uploadFile(
+            CloudinaryFile.fromFile(newImages[i].path, folder: name),
+          );
+          finalImageUrls.add(res.secureUrl);
+        }
+      }
+
+      // Tạo product object với thông tin mới
+      Map<String, dynamic> productData = {
+        'id': productId,
+        'name': name,
+        'description': description,
+        'quantity': quantity,
+        'images': finalImageUrls,
+        'category': category,
+        'price': price,
+      };
+
+      http.Response res = await http.put(
+        Uri.parse('$uri/admin/edit-product'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'x-auth-token': userProvider.user.token,
+        },
+        body: jsonEncode(productData),
+      );
+
+      httpErrorHand(
+        response: res,
+        context: context,
+        onSuccess: () {
+          showSnackBar(context, 'Product updated successfully!');
+          Navigator.pop(context);
         },
       );
     } catch (e) {

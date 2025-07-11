@@ -1,4 +1,3 @@
-import 'package:amazon_clone/common/widgets/custom_button.dart';
 import 'package:amazon_clone/constants/global_variables.dart';
 import 'package:amazon_clone/features/auth/services/auth_service.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +13,8 @@ class AuthScreen extends StatefulWidget {
   State<AuthScreen> createState() => _AuthScreenState();
 }
 
-class _AuthScreenState extends State<AuthScreen> {
+class _AuthScreenState extends State<AuthScreen> 
+    with TickerProviderStateMixin {
   Auth _auth = Auth.signUp;
   final _signUpFormKey = GlobalKey<FormState>();
   final _signInFormKey = GlobalKey<FormState>();
@@ -22,9 +22,30 @@ class _AuthScreenState extends State<AuthScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
+  bool _obscurePassword = true;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    ));
+    _animationController.forward();
+  }
 
   @override
   void dispose() {
+    _animationController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _nameController.dispose();
@@ -51,122 +72,322 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: GlobalVariables.greyBackgroundCOlor,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Welcome',
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.w500),
-              ),
-              ListTile(
-                tileColor: _auth == Auth.signUp
-                    ? GlobalVariables.backgroundColor
-                    : GlobalVariables.greyBackgroundCOlor,
-                title: const Text(
-                  'Sign Up',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                leading: Radio(
-                  activeColor: GlobalVariables.secondaryColor,
-                  value: Auth.signUp,
-                  groupValue: _auth,
-                  onChanged: (Auth? val) {
-                    setState(() {
-                      _auth = val!;
-                    });
-                  },
-                ),
-              ),
-              if (_auth == Auth.signUp)
-                Container(
-                  padding: const EdgeInsets.all(8.0),
-                  color: GlobalVariables.backgroundColor,
-                  child: Form(
-                    key: _signUpFormKey,
-                    child: Column(
-                      children: [
-                        CustomTextField(
-                          controller: _nameController,
-                          hintText: 'Name',
-                        ),
-                        const SizedBox(height: 10),
-                        CustomTextField(
-                          controller: _emailController,
-                          hintText: 'Email',
-                        ),
-                        const SizedBox(height: 10),
-                        CustomTextField(
-                          controller: _passwordController,
-                          hintText: 'Password',
-                        ),
-                        const SizedBox(height: 10),
-                        CustomButton(
-                          text: 'Sign Up', 
-                          onTap: () {
-                            if (_signUpFormKey.currentState!.validate()) {
-                              signUpUser();
-                            }
-                          }
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ListTile(
-                tileColor: _auth == Auth.signIn
-                    ? GlobalVariables.backgroundColor
-                    : GlobalVariables.greyBackgroundCOlor,
-                title: const Text(
-                  'Sign In',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                leading: Radio(
-                  activeColor: GlobalVariables.secondaryColor,
-                  value: Auth.signIn,
-                  groupValue: _auth,
-                  onChanged: (Auth? val) {
-                    setState(() {
-                      _auth = val!;
-                    });
-                  },
-                ),
-              ),
-              if (_auth == Auth.signIn)
-                Container(
-                  padding: const EdgeInsets.all(8.0),
-                  color: GlobalVariables.backgroundColor,
-                  child: Form(
-                    key: _signInFormKey,
-                    child: Column(
-                      children: [
-                        CustomTextField(
-                          controller: _emailController,
-                          hintText: 'Email',
-                        ),
-                        const SizedBox(height: 10),
-                        CustomTextField(
-                          controller: _passwordController,
-                          hintText: 'Password',
-                        ),
-                        const SizedBox(height: 10),
-                        CustomButton(
-                          text: 'Sign In', 
-                          onTap: () {
-                            if (_signInFormKey.currentState!.validate()) {
-                              signInUser();
-                            }
-                          }
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              GlobalVariables.selectedNavBarColor.withOpacity(0.8),
+              GlobalVariables.secondaryColor.withOpacity(0.6),
+              Colors.orange.withOpacity(0.4),
             ],
           ),
+        ),
+        child: SafeArea(
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 40),
+                    // Logo and Welcome Section
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.shopping_bag_rounded,
+                            size: 80,
+                            color: GlobalVariables.selectedNavBarColor,
+                          ),
+                          const SizedBox(height: 20),
+                          Text(
+                            'Welcome to Amazon Clone',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: GlobalVariables.selectedNavBarColor,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            'Sign in to continue shopping',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey[600],
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                    
+                    // Auth Toggle Buttons
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 15,
+                            offset: const Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _auth = Auth.signUp;
+                                });
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: _auth == Auth.signUp
+                                      ? GlobalVariables.selectedNavBarColor
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                child: Text(
+                                  'Sign Up',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: _auth == Auth.signUp
+                                        ? Colors.white
+                                        : GlobalVariables.selectedNavBarColor,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _auth = Auth.signIn;
+                                });
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: _auth == Auth.signIn
+                                      ? GlobalVariables.selectedNavBarColor
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                child: Text(
+                                  'Sign In',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: _auth == Auth.signIn
+                                        ? Colors.white
+                                        : GlobalVariables.selectedNavBarColor,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+
+                    // Forms
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      child: _auth == Auth.signUp
+                          ? _buildSignUpForm()
+                          : _buildSignInForm(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSignUpForm() {
+    return Container(
+      key: const ValueKey('signUp'),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.95),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Form(
+        key: _signUpFormKey,
+        child: Column(
+          children: [
+            CustomTextField(
+              controller: _nameController,
+              hintText: 'Full Name',
+              prefixIcon: Icons.person_outline,
+            ),
+            const SizedBox(height: 20),
+            CustomTextField(
+              controller: _emailController,
+              hintText: 'Email Address',
+              prefixIcon: Icons.email_outlined,
+            ),
+            const SizedBox(height: 20),
+            CustomTextField(
+              controller: _passwordController,
+              hintText: 'Password',
+              isPassword: true,
+              obscureText: _obscurePassword,
+              prefixIcon: Icons.lock_outline,
+              onToggleVisibility: () {
+                setState(() {
+                  _obscurePassword = !_obscurePassword;
+                });
+              },
+            ),
+            const SizedBox(height: 30),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  if (_signUpFormKey.currentState!.validate()) {
+                    signUpUser();
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: GlobalVariables.selectedNavBarColor,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 5,
+                ),
+                child: const Text(
+                  'Create Account',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSignInForm() {
+    return Container(
+      key: const ValueKey('signIn'),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.95),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Form(
+        key: _signInFormKey,
+        child: Column(
+          children: [
+            CustomTextField(
+              controller: _emailController,
+              hintText: 'Email Address',
+              prefixIcon: Icons.email_outlined,
+            ),
+            const SizedBox(height: 20),
+            CustomTextField(
+              controller: _passwordController,
+              hintText: 'Password',
+              isPassword: true,
+              obscureText: _obscurePassword,
+              prefixIcon: Icons.lock_outline,
+              onToggleVisibility: () {
+                setState(() {
+                  _obscurePassword = !_obscurePassword;
+                });
+              },
+            ),
+            const SizedBox(height: 30),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  if (_signInFormKey.currentState!.validate()) {
+                    signInUser();
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: GlobalVariables.selectedNavBarColor,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 5,
+                ),
+                child: const Text(
+                  'Sign In',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            TextButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/forgot-password');
+              },
+              child: Text(
+                'Forgot Password?',
+                style: TextStyle(
+                  color: GlobalVariables.selectedNavBarColor,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

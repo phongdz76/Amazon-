@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:amazon_clone/common/widgets/custom_button.dart';
 import 'package:amazon_clone/common/widgets/custom_textfield.dart';
 import 'package:amazon_clone/constants/global_variables.dart';
 import 'package:amazon_clone/constants/utils.dart';
@@ -27,7 +26,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
   String category = 'Mobiles';
   List<File> images = [];
   final _addProductformKey = GlobalKey<FormState>();
-
 
   @override
   void dispose() {
@@ -97,14 +95,10 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 const SizedBox(height: 20),
                 images.isNotEmpty
                     ? CarouselSlider(
-                        items: images.map(
-                          (i) {
+                        items: images.map((i) {
                           return Builder(
-                            builder: (BuildContext context) => Image.file(
-                              i,
-                              fit: BoxFit.cover,
-                              height: 200,
-                            ),
+                            builder: (BuildContext context) =>
+                                Image.file(i, fit: BoxFit.cover, height: 200),
                           );
                         }).toList(),
                         options: CarouselOptions(
@@ -188,11 +182,69 @@ class _AddProductScreenState extends State<AddProductScreen> {
                     },
                   ),
                 ),
-                const SizedBox(height: 20),
-                CustomButton(
-                  text: 'Sell', 
-                  onTap: sellProduct,
+                const SizedBox(height: 30),
+
+                // Modern Sell Product Button
+                Container(
+                  width: double.infinity,
+                  height: 56,
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: const LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [Color(0xFF2196F3), Color(0xFF1976D2)],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF2196F3).withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                        spreadRadius: 0,
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: sellProduct,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(2),
+                              decoration: const BoxDecoration(
+                                color: Colors.white24,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.sell_rounded,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            const Text(
+                              'Sell Product',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
+
+                const SizedBox(height: 20),
               ],
             ),
           ),
