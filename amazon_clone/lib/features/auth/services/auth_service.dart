@@ -70,7 +70,7 @@ class AuthService {
           SharedPreferences prefs = await SharedPreferences.getInstance();
           Provider.of<UserProvider>(context, listen: false).setUser(res.body);
           await prefs.setString('x-auth-token', jsonDecode(res.body)['token']);
-          
+
           // Kiểm tra loại user để điều hướng phù hợp
           var userType = jsonDecode(res.body)['type'];
           if (userType == 'admin') {
@@ -107,13 +107,13 @@ class AuthService {
         Uri.parse('$uri/tokenIsValid'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
-          'x-auth-token': token!
+          'x-auth-token': token!,
         },
       );
 
       var response = jsonDecode(tokenRes.body);
 
-      if(response == true) {
+      if (response == true) {
         http.Response userRes = await http.get(
           Uri.parse('$uri/'),
           headers: <String, String>{
@@ -143,12 +143,15 @@ class AuthService {
           'Content-Type': 'application/json; charset=UTF-8',
         },
       );
-      
+
       httpErrorHand(
         response: res,
         context: context,
         onSuccess: () {
-          showSnackBar(context, 'Password reset instructions sent to your email!');
+          showSnackBar(
+            context,
+            'Password reset instructions sent to your email!',
+          );
         },
       );
     } catch (e) {

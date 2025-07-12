@@ -199,7 +199,7 @@ class _SplashScreenState extends State<SplashScreen>
                   child: Column(
                     children: [
                       Text(
-                        'Amazon Clone',
+                        'Amazon',
                         style: TextStyle(
                           fontSize: 36,
                           fontWeight: FontWeight.bold,

@@ -8,7 +8,7 @@ class CustomTextField extends StatelessWidget {
   final bool obscureText;
   final VoidCallback? onToggleVisibility;
   final IconData? prefixIcon;
-  
+
   const CustomTextField({
     super.key,
     required this.controller,
@@ -27,27 +27,20 @@ class CustomTextField extends StatelessWidget {
       obscureText: isPassword ? obscureText : false,
       decoration: InputDecoration(
         hintText: hintText,
-        prefixIcon: prefixIcon != null 
-          ? Icon(prefixIcon, color: Colors.black54)
-          : null,
+        prefixIcon: prefixIcon != null
+            ? Icon(prefixIcon, color: Colors.black54)
+            : null,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Colors.grey.shade300,
-          ),
+          borderSide: BorderSide(color: Colors.grey.shade300),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Colors.grey.shade300,
-          ),
+          borderSide: BorderSide(color: Colors.grey.shade300),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: Colors.orange,
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: Colors.orange, width: 2),
         ),
         filled: true,
         fillColor: Colors.grey.shade50,
@@ -55,15 +48,15 @@ class CustomTextField extends StatelessWidget {
           horizontal: 16,
           vertical: 16,
         ),
-        suffixIcon: isPassword 
-          ? IconButton(
-              icon: Icon(
-                obscureText ? Icons.visibility : Icons.visibility_off,
-                color: Colors.black54,
-              ),
-              onPressed: onToggleVisibility,
-            )
-          : null,
+        suffixIcon: isPassword
+            ? IconButton(
+                icon: Icon(
+                  obscureText ? Icons.visibility : Icons.visibility_off,
+                  color: Colors.black54,
+                ),
+                onPressed: onToggleVisibility,
+              )
+            : null,
       ),
       validator: (val) {
         if (val == null || val.isEmpty) {
