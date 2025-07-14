@@ -10,6 +10,15 @@ class SearchedProduct extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    double totalRating = 0;
+    for (int i = 0; i < product.rating!.length; i++) {
+      totalRating += product.rating![i].rating;
+    }
+
+    double avgRating = 0;
+    if (totalRating != 0) {
+      avgRating = totalRating / product.rating!.length;
+    }
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -114,7 +123,7 @@ class SearchedProduct extends StatelessWidget {
                       const SizedBox(height: 8),
 
                       // Rating
-                      const Stars(rating: 4),
+                      Stars(rating: avgRating,),
 
                       const SizedBox(height: 12),
 
