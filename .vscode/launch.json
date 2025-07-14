@@ -23,6 +23,13 @@
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"
+        },
+        {
+            "name": "Flutter (lib\\main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "amazon_clone",
+            "program": "lib\\main.dart"
         }
     ]
 }

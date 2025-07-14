@@ -5,8 +5,10 @@ import 'package:amazon_clone/features/auth/screens/auth_screen.dart';
 import 'package:amazon_clone/features/auth/screens/forgot_password_screen.dart';
 import 'package:amazon_clone/features/home/screens/category_deals_screen.dart';
 import 'package:amazon_clone/features/home/screens/home_screen.dart';
+import 'package:amazon_clone/features/product_details/screens/product_details_screen.dart';
 import 'package:amazon_clone/features/search/screens/search_screen.dart';
 import 'package:amazon_clone/features/splash/screens/splash_screen.dart';
+import 'package:amazon_clone/models/product.dart';
 import 'package:flutter/material.dart';
 
 Route<dynamic> generateRoute(RouteSettings routeSetting) {
@@ -40,16 +42,19 @@ Route<dynamic> generateRoute(RouteSettings routeSetting) {
         settings: routeSetting,
         builder: (_) => const HomeScreen(),
       );
+
     case BottomBar.routeName:
       return MaterialPageRoute(
         settings: routeSetting,
         builder: (_) => const BottomBar(),
       );
+
     case AddProductScreen.routeName:
       return MaterialPageRoute(
         settings: routeSetting,
         builder: (_) => const AddProductScreen(),
       );
+
       case CategoryDealsScreen.routeName:
       var category = routeSetting.arguments as String;
       return MaterialPageRoute(
@@ -58,6 +63,7 @@ Route<dynamic> generateRoute(RouteSettings routeSetting) {
           category: category,
         ),
       );
+
       case SearchScreen.routeName:
       var searchQuery = routeSetting.arguments as String;
       return MaterialPageRoute(
@@ -66,6 +72,16 @@ Route<dynamic> generateRoute(RouteSettings routeSetting) {
           searchQuery: searchQuery,
         ),
       );
+
+      case ProductDetailsScreen.routeName:
+      var product = routeSetting.arguments as Product;
+      return MaterialPageRoute(
+        settings: routeSetting,
+        builder: (_) =>  ProductDetailsScreen(
+          product: product,
+        ),
+      );
+
     default:
       return MaterialPageRoute(
         settings: routeSetting,

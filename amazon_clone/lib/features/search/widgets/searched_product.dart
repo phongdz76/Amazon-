@@ -1,4 +1,5 @@
 import 'package:amazon_clone/common/widgets/stars.dart';
+import 'package:amazon_clone/features/product_details/screens/product_details_screen.dart';
 import 'package:amazon_clone/models/product.dart';
 import 'package:flutter/material.dart';
 
@@ -32,7 +33,11 @@ class SearchedProduct extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: () {
-            // Navigation to product detail page
+            Navigator.pushNamed(
+              context,
+              ProductDetailsScreen.routeName,
+              arguments: product,
+            );
           },
           child: Padding(
             padding: const EdgeInsets.all(16),
