@@ -56,6 +56,27 @@ authRouter.post("/api/signIn", async (req, res) => {
     }   
 }); 
 
+authRouter.post("/tokenIsValid", async (req, res) => {
+    try {
+    const token = req.header("x-auth-token");
+    if (!token) return res.json(false); 
+    const verified = jwt.verify(token, "passwordKey")
+    if (!verified) return res.json(false);
+
+    const user = await User.findById(verified.id);
+    if (!user) return res.json(false);
+    res.json(true);
+    } catch (e) {           
+        res.status(500).json({ error: e.message });
+    }   
+});
+
+// get user data
+authRouter.get("/", auth , async (req, res) => {
+    const user = await User.findById(req.user);
+    res.json({ ...user._doc, token: req.token });
+})
+
 // POST /api/forgot-password
 authRouter.post("/api/forgot-password", async (req, res) => {
     try {
@@ -91,61 +112,40 @@ authRouter.post("/api/forgot-password", async (req, res) => {
     }
 });
 
-// POST /api/reset-password  
-authRouter.post("/api/reset-password", async (req, res) => {
-    try {
-        const { token, newPassword } = req.body;
+// // POST /api/reset-password  
+// authRouter.post("/api/reset-password", async (req, res) => {
+//     try {
+//         const { token, newPassword } = req.body;
 
-        // Verify token
-        const decoded = jwt.verify(token, "passwordKey");
-        if (decoded.purpose !== 'password-reset') {
-            return res.status(400).json({ msg: "Invalid reset token" });
-        }
+//         // Verify token
+//         const decoded = jwt.verify(token, "passwordKey");
+//         if (decoded.purpose !== 'password-reset') {
+//             return res.status(400).json({ msg: "Invalid reset token" });
+//         }
 
-        // Tìm user
-        const user = await User.findById(decoded.id);
-        if (!user) {
-            return res.status(400).json({ msg: "User not found" });
-        }
+//         // Tìm user
+//         const user = await User.findById(decoded.id);
+//         if (!user) {
+//             return res.status(400).json({ msg: "User not found" });
+//         }
 
-        // Hash password mới
-        const hashedPassword = await bcrypt.hash(newPassword, 8);
+//         // Hash password mới
+//         const hashedPassword = await bcrypt.hash(newPassword, 8);
         
-        // Cập nhật password
-        user.password = hashedPassword;
-        await user.save();
+//         // Cập nhật password
+//         user.password = hashedPassword;
+//         await user.save();
 
-        res.json({ msg: "Password reset successful" });
-    } catch (e) {
-        if (e.name === 'TokenExpiredError') {
-            return res.status(400).json({ msg: "Reset token has expired" });
-        }
-        if (e.name === 'JsonWebTokenError') {
-            return res.status(400).json({ msg: "Invalid reset token" });
-        }
-        res.status(500).json({ error: e.message });
-    }
-});
-
-authRouter.post("/tokenIsValid", async (req, res) => {
-    try {
-    const token = req.header("x-auth-token");
-    if (!token) return res.json(false); 
-    const verified = jwt.verify(token, "passwordKey")
-    if (!verified) return res.json(false);
-
-    const user = await User.findById(verified.id);
-    if (!user) return res.json(false);
-    res.json(true);
-    } catch (e) {           
-        res.status(500).json({ error: e.message });
-    }   
-});
-
-// get user data
-authRouter.get("/", auth , async (req, res) => {
-    const user = await User.findById(req.user);
-    res.json({ ...user._doc, token: req.token });
-})
+//         res.json({ msg: "Password reset successful" });
+//     } catch (e) {
+//         if (e.name === 'TokenExpiredError') {
+//             return res.status(400).json({ msg: "Reset token has expired" });
+//         }
+//         if (e.name === 'JsonWebTokenError') {
+//             return res.status(400).json({ msg: "Invalid reset token" });
+//         }
+//         res.status(500).json({ error: e.message });
+//     }
+// });
 
 module.exports = authRouter;
