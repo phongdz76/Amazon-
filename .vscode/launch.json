@@ -30,6 +30,13 @@
             "request": "launch",
             "cwd": "amazon_clone",
             "program": "lib\\main.dart"
+        },
+        {
+            "name": "Flutter (lib\\main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "amazon_clone",
+            "program": "lib\\main.dart"
         }
     ]
 }

@@ -6,9 +6,11 @@ import 'package:amazon_clone/features/auth/screens/auth_screen.dart';
 import 'package:amazon_clone/features/auth/screens/forgot_password_screen.dart';
 import 'package:amazon_clone/features/home/screens/category_deals_screen.dart';
 import 'package:amazon_clone/features/home/screens/home_screen.dart';
+import 'package:amazon_clone/features/order_details/screens/order_details.dart';
 import 'package:amazon_clone/features/product_details/screens/product_details_screen.dart';
 import 'package:amazon_clone/features/search/screens/search_screen.dart';
 import 'package:amazon_clone/features/splash/screens/splash_screen.dart';
+import 'package:amazon_clone/models/order.dart';
 import 'package:amazon_clone/models/product.dart';
 import 'package:flutter/material.dart';
 
@@ -56,40 +58,39 @@ Route<dynamic> generateRoute(RouteSettings routeSetting) {
         builder: (_) => const AddProductScreen(),
       );
 
-      case CategoryDealsScreen.routeName:
+    case CategoryDealsScreen.routeName:
       var category = routeSetting.arguments as String;
       return MaterialPageRoute(
         settings: routeSetting,
-        builder: (_) =>  CategoryDealsScreen(
-          category: category,
-        ),
+        builder: (_) => CategoryDealsScreen(category: category),
       );
 
-      case SearchScreen.routeName:
+    case SearchScreen.routeName:
       var searchQuery = routeSetting.arguments as String;
       return MaterialPageRoute(
         settings: routeSetting,
-        builder: (_) =>  SearchScreen(
-          searchQuery: searchQuery,
-        ),
+        builder: (_) => SearchScreen(searchQuery: searchQuery),
       );
 
-      case ProductDetailsScreen.routeName:
+    case ProductDetailsScreen.routeName:
       var product = routeSetting.arguments as Product;
       return MaterialPageRoute(
         settings: routeSetting,
-        builder: (_) =>  ProductDetailsScreen(
-          product: product,
-        ),
+        builder: (_) => ProductDetailsScreen(product: product),
       );
 
-      case AddressScreen.routeName:
+    case AddressScreen.routeName:
       var totalAmount = routeSetting.arguments as String;
       return MaterialPageRoute(
         settings: routeSetting,
-        builder: (_) => AddressScreen(
-          totalAmount: totalAmount,
-        ),
+        builder: (_) => AddressScreen(totalAmount: totalAmount),
+      );
+
+    case OrderDetailScreen.routeName:
+      var order = routeSetting.arguments as Order;
+      return MaterialPageRoute(
+        settings: routeSetting,
+        builder: (_) => OrderDetailScreen(order: order),
       );
 
     default:
