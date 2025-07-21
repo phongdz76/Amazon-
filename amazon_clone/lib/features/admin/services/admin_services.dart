@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:amazon_clone/constants/error_handling.dart';
 import 'package:amazon_clone/constants/global_variables.dart';
 import 'package:amazon_clone/constants/utils.dart';
+import 'package:amazon_clone/features/admin/models/sales.dart';
 import 'package:amazon_clone/models/order.dart';
 import 'package:amazon_clone/models/product.dart';
 import 'package:amazon_clone/providers/user_provider.dart';
@@ -212,28 +213,24 @@ class AdminServices {
 
   // Fetch all orders
   /// Lấy danh sách tất cả các đơn hàng từ server
-    Future<List<Order>> fetchAllOrders(BuildContext context) async {
+  Future<List<Order>> fetchAllOrders(BuildContext context) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     List<Order> orderList = [];
     try {
-      http.Response res =
-          await http.get(Uri.parse('$uri/admin/get-orders'), headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-        'x-auth-token': userProvider.user.token,
-      });
+      http.Response res = await http.get(
+        Uri.parse('$uri/admin/get-orders'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'x-auth-token': userProvider.user.token,
+        },
+      );
 
       httpErrorHand(
         response: res,
         context: context,
         onSuccess: () {
           for (int i = 0; i < jsonDecode(res.body).length; i++) {
-            orderList.add(
-              Order.fromJson(
-                jsonEncode(
-                  jsonDecode(res.body)[i],
-                ),
-              ),
-            );
+            orderList.add(Order.fromJson(jsonEncode(jsonDecode(res.body)[i])));
           }
         },
       );
@@ -242,7 +239,7 @@ class AdminServices {
     }
     return orderList;
   }
-  
+
   // Change order status
   void changeOrderStatus({
     required BuildContext context,
@@ -259,19 +256,47 @@ class AdminServices {
           'Content-Type': 'application/json; charset=UTF-8',
           'x-auth-token': userProvider.user.token,
         },
-        body: jsonEncode({
-          'id': order.id,
-          'status': status,
-        }),
+        body: jsonEncode({'id': order.id, 'status': status}),
+      );
+
+      httpErrorHand(response: res, context: context, onSuccess: onSuccess);
+    } catch (e) {
+      showSnackBar(context, e.toString());
+    }
+  }
+
+  // Get earnings for analytics
+  Future<Map<String, dynamic>> getEarnings(BuildContext context) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    List<Sales> sales = [];
+    int totalEarning = 0;
+    try {
+      http.Response res = await http.get(
+        Uri.parse('$uri/admin/analytics'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'x-auth-token': userProvider.user.token,
+        },
       );
 
       httpErrorHand(
         response: res,
         context: context,
-        onSuccess: onSuccess,
+        onSuccess: () {
+          var response = jsonDecode(res.body);
+          totalEarning = (response['totalEarnings'] as num).toInt();
+          sales = [
+            Sales('Mobiles', (response['mobileEarnings'] as num).toInt()),
+            Sales('Essentials', (response['essentialEarnings'] as num).toInt()),
+            Sales('Books', (response['booksEarnings'] as num).toInt()),
+            Sales('Appliances', (response['applianceEarnings'] as num).toInt()),
+            Sales('Fashion', (response['fashionEarnings'] as num).toInt()),
+          ];
+        },
       );
     } catch (e) {
       showSnackBar(context, e.toString());
     }
+    return {'sales': sales, 'totalEarnings': totalEarning};
   }
 }
