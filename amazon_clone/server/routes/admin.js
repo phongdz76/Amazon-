@@ -113,7 +113,17 @@ adminRouter.post("/admin/change-order-status", admin, async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
-
+adminRouter.post("/admin/change-order-statusUser", async (req, res) => {
+  try {
+    const { id, status } = req.body;
+    let order = await Order.findById(id);
+    order.status = status;
+    order = await order.save();
+    res.json(order);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
 // analytics
 adminRouter.get("/admin/analytics", admin, async (req, res) => {
   try {

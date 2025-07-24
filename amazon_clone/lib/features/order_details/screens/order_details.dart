@@ -1,6 +1,7 @@
 // import 'package:amazon_clone/common/widgets/custom_button.dart';
 import 'package:amazon_clone/constants/global_variables.dart';
 import 'package:amazon_clone/features/admin/services/admin_services.dart';
+import 'package:amazon_clone/features/product_details/services/product_details_service.dart';
 import 'package:amazon_clone/features/search/screens/search_screen.dart';
 import 'package:amazon_clone/models/order.dart';
 import 'package:amazon_clone/providers/user_provider.dart';
@@ -43,6 +44,226 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         });
       },
     );
+  }
+
+  // Cancel order function
+  void cancelOrder() {
+    showDialog(
+      context: context,
+      barrierDismissible:
+          false, // Don't allow closing dialog by tapping outside
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: Row(
+            children: [
+              Icon(
+                Icons.warning_amber_rounded,
+                color: Colors.orange[700],
+                size: 28,
+              ),
+              const SizedBox(width: 10),
+              const Text(
+                'Confirm Cancel Order',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Are you sure you want to cancel this order?',
+                style: TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red[50],
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red[200]!),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.red[600], size: 20),
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        'Cancelled orders cannot be restored.',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.red,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _performCancelOrder();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                elevation: 2,
+              ),
+              child: const Text(
+                'Confirm Cancel',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Perform cancel order function
+  void _performCancelOrder() {
+    // Show loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const Center(child: CircularProgressIndicator());
+      },
+    );
+
+    // Call API to cancel order through AdminServices with status 4
+    adminServices.changeOrderStatusUser(
+      context: context,
+      status: 4, // Status 4 = Cancel Order
+      order: widget.order,
+      onSuccess: () {
+        // Close loading dialog
+        Navigator.of(context).pop();
+
+        setState(() {
+          currentStep = 4; // Update UI to "Order Cancelled" status
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white, size: 20),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: Text(
+                    'Order has been cancelled successfully',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.red[600],
+            duration: const Duration(seconds: 4),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            margin: const EdgeInsets.all(10),
+          ),
+        );
+      },
+    );
+  }
+
+  // Reorder items function
+  void reorderItems() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Reorder'),
+          content: const Text(
+            'Do you want to add all products from this order to your cart?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('No'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _addProductsToCart();
+              },
+              child: const Text('Yes', style: TextStyle(color: Colors.green)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Add products to cart function
+  void _addProductsToCart() {
+    final ProductDetailsService productDetailsService = ProductDetailsService();
+
+    try {
+      for (int i = 0; i < widget.order.products.length; i++) {
+        for (int j = 0; j < widget.order.quantity[i]; j++) {
+          productDetailsService.addToCart(
+            context: context,
+            product: widget.order.products[i],
+          );
+        }
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('All products have been added to cart'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 3),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('An error occurred: ${e.toString()}'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
   }
 
   @override
@@ -139,7 +360,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       'Order Date:      ${DateFormat().format(DateTime.fromMillisecondsSinceEpoch(widget.order.orderedAt))}',
                     ),
                     Text('Order ID:          ${widget.order.id}'),
-                    Text('Order Total:       \$${widget.order.totalPrice}'),
+                    Text('Order Total:      \$${widget.order.totalPrice}'),
                   ],
                 ),
               ),
@@ -186,6 +407,66 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   ],
                 ),
               ),
+              //
+              const SizedBox(height: 15),
+              // Only show cancel button if order hasn't been delivered (currentStep < 3) and hasn't been cancelled (currentStep != 4)
+              if (currentStep < 3 && currentStep != 4)
+                Center(
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: cancelOrder,
+                      icon: const Icon(Icons.cancel, color: Colors.white),
+                      label: const Text(
+                        'Cancel Order',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        elevation: 2,
+                      ),
+                    ),
+                  ),
+                ),
+              if (currentStep < 3 &&
+                  currentStep != 4 &&
+                  (currentStep == 3 || currentStep == 4))
+                const SizedBox(height: 10),
+
+              // Reorder button - only show if order is completed (status = 3) or cancelled (status = 4)
+              if (currentStep == 3 || currentStep == 4)
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: reorderItems,
+                    icon: const Icon(Icons.shopping_cart, color: Colors.white),
+                    label: const Text(
+                      'Reorder',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      elevation: 2,
+                    ),
+                  ),
+                ),
+              //
               const SizedBox(height: 10),
               const Text(
                 'Tracking',
@@ -260,8 +541,16 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       content: const Text(
                         'Your order has been delivered and signed by you!',
                       ),
-                      isActive: currentStep >= 3,
-                      state: currentStep >= 3
+                      isActive: currentStep > 3,
+                      state: currentStep > 3
+                          ? StepState.complete
+                          : StepState.indexed,
+                    ),
+                    Step(
+                      title: const Text('Cancel Order'),
+                      content: const Text('Your order has been cancelled.'),
+                      isActive: currentStep >= 4,
+                      state: currentStep >= 4
                           ? StepState.complete
                           : StepState.indexed,
                     ),

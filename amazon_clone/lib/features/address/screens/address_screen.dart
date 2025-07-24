@@ -112,7 +112,7 @@ class _AddressScreenState extends State<AddressScreen> {
     if (isForm) {
       if (_addressFormKey.currentState!.validate()) {
         addressToBeUsed =
-            '${flatBuildingController.text}, ${areaController.text}, ${cityController.text} - ${pincodeController.text}';
+            '${flatBuildingController.text}, ${areaController.text}, ${pincodeController.text} , ${cityController.text}';
       } else {
         throw Exception('Please enter all the values!');
       }
@@ -189,7 +189,7 @@ class _AddressScreenState extends State<AddressScreen> {
                     const SizedBox(height: 10),
                     CustomTextField(
                       controller: pincodeController,
-                      hintText: 'Pincode',
+                      hintText: 'Ward',
                     ),
                     const SizedBox(height: 10),
                     CustomTextField(

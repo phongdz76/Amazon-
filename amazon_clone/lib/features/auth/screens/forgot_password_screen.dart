@@ -33,7 +33,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           context: context,
           email: _emailController.text,
         );
-        
+
         // Hiển thị dialog thành công
         _showSuccessDialog();
       } catch (e) {
@@ -57,11 +57,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           ),
           title: Row(
             children: [
-              Icon(
-                Icons.check_circle,
-                color: Colors.green,
-                size: 30,
-              ),
+              Icon(Icons.check_circle, color: Colors.green, size: 30),
               const SizedBox(width: 10),
               const Text('Success!'),
             ],
@@ -112,15 +108,15 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               child: Column(
                 children: [
                   const SizedBox(height: 40),
-                  
+
                   // Header với nút back
                   _buildHeader(),
-                  
+
                   const SizedBox(height: 60),
-                  
+
                   // Main content card
                   _buildContentCard(),
-                  
+
                   const SizedBox(height: 20),
                 ],
               ),
@@ -194,9 +190,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 color: GlobalVariables.selectedNavBarColor,
               ),
             ),
-            
+
             const SizedBox(height: 20),
-            
+
             const Text(
               'Forgot Your Password?',
               style: TextStyle(
@@ -206,9 +202,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               ),
               textAlign: TextAlign.center,
             ),
-            
+
             const SizedBox(height: 10),
-            
+
             Text(
               'Enter your email address and we\'ll send you instructions to reset your password.',
               style: TextStyle(
@@ -218,9 +214,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               ),
               textAlign: TextAlign.center,
             ),
-            
+
             const SizedBox(height: 30),
-            
+
             // Email form
             Form(
               key: _formKey,
@@ -232,9 +228,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 20),
-            
+
             // Back to sign in
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
