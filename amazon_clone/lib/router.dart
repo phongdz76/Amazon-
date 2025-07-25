@@ -10,7 +10,7 @@ import 'package:amazon_clone/features/auth/screens/auth_screen.dart';
 import 'package:amazon_clone/features/auth/screens/forgot_password_screen.dart';
 import 'package:amazon_clone/features/home/screens/category_deals_screen.dart';
 import 'package:amazon_clone/features/home/screens/home_screen.dart';
-import 'package:amazon_clone/features/livesream/liveStream.dart' hide Product;
+import 'package:amazon_clone/features/livesream/liveStream.dart';
 import 'package:amazon_clone/features/order_details/screens/order_details.dart';
 import 'package:amazon_clone/features/product_details/screens/product_details_screen.dart';
 import 'package:amazon_clone/features/search/screens/search_screen.dart';
