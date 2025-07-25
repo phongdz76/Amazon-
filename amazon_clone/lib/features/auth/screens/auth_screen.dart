@@ -176,7 +176,8 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                                       ? LinearGradient(
                                           colors: [
                                             GlobalVariables.selectedNavBarColor,
-                                            GlobalVariables.selectedNavBarColor.withOpacity(0.8),
+                                            GlobalVariables.selectedNavBarColor
+                                                .withOpacity(0.8),
                                           ],
                                         )
                                       : null,
@@ -184,13 +185,17 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                                       ? null
                                       : Colors.transparent,
                                   borderRadius: BorderRadius.circular(18),
-                                  boxShadow: _auth == Auth.signUp ? [
-                                    BoxShadow(
-                                      color: GlobalVariables.selectedNavBarColor.withOpacity(0.3),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ] : null,
+                                  boxShadow: _auth == Auth.signUp
+                                      ? [
+                                          BoxShadow(
+                                            color: GlobalVariables
+                                                .selectedNavBarColor
+                                                .withOpacity(0.3),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ]
+                                      : null,
                                 ),
                                 child: Text(
                                   'Sign Up',
@@ -220,7 +225,8 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                                       ? LinearGradient(
                                           colors: [
                                             GlobalVariables.selectedNavBarColor,
-                                            GlobalVariables.selectedNavBarColor.withOpacity(0.8),
+                                            GlobalVariables.selectedNavBarColor
+                                                .withOpacity(0.8),
                                           ],
                                         )
                                       : null,
@@ -228,13 +234,17 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                                       ? null
                                       : Colors.transparent,
                                   borderRadius: BorderRadius.circular(18),
-                                  boxShadow: _auth == Auth.signIn ? [
-                                    BoxShadow(
-                                      color: GlobalVariables.selectedNavBarColor.withOpacity(0.3),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ] : null,
+                                  boxShadow: _auth == Auth.signIn
+                                      ? [
+                                          BoxShadow(
+                                            color: GlobalVariables
+                                                .selectedNavBarColor
+                                                .withOpacity(0.3),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ]
+                                      : null,
                                 ),
                                 child: Text(
                                   'Sign In',
@@ -337,7 +347,9 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                     borderRadius: BorderRadius.circular(15),
                   ),
                   elevation: 8,
-                  shadowColor: GlobalVariables.selectedNavBarColor.withOpacity(0.4),
+                  shadowColor: GlobalVariables.selectedNavBarColor.withOpacity(
+                    0.4,
+                  ),
                 ),
                 child: const Text(
                   'Create Account',
@@ -414,7 +426,9 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                     borderRadius: BorderRadius.circular(15),
                   ),
                   elevation: 8,
-                  shadowColor: GlobalVariables.selectedNavBarColor.withOpacity(0.4),
+                  shadowColor: GlobalVariables.selectedNavBarColor.withOpacity(
+                    0.4,
+                  ),
                 ),
                 child: const Text(
                   'Sign In',
