@@ -8,6 +8,7 @@ class CustomTextField extends StatelessWidget {
   final bool obscureText;
   final VoidCallback? onToggleVisibility;
   final IconData? prefixIcon;
+  final TextInputType? keyboardType;
 
   const CustomTextField({
     super.key,
@@ -18,6 +19,7 @@ class CustomTextField extends StatelessWidget {
     this.obscureText = false,
     this.onToggleVisibility,
     this.prefixIcon,
+    this.keyboardType,
   });
 
   @override
@@ -25,6 +27,7 @@ class CustomTextField extends StatelessWidget {
     return TextFormField(
       controller: controller,
       obscureText: isPassword ? obscureText : false,
+      keyboardType: keyboardType,
       decoration: InputDecoration(
         hintText: hintText,
         prefixIcon: prefixIcon != null

@@ -11,9 +11,9 @@ import 'package:http/http.dart' as http;
 
 class HomeServices {
   Future<List<Product>> fetchCategoryProducts({
-    required BuildContext context, 
+    required BuildContext context,
     required String category,
-    }) async{
+  }) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     List<Product> productList = [];
     try {
@@ -42,9 +42,50 @@ class HomeServices {
     return productList;
   }
 
-   Future<Product> fetchDealOfDay({
-    required BuildContext context, 
-    }) async{
+  Future<List<Product>> fetchAllProducts({
+    required BuildContext context,
+  }) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    List<Product> productList = [];
+
+    // Fetch products from all categories
+    List<String> categories = [
+      'Mobiles',
+      'Essentials',
+      'Appliances',
+      'Books',
+      'Fashion',
+    ];
+
+    try {
+      for (String category in categories) {
+        http.Response res = await http.get(
+          Uri.parse('$uri/api/products?category=$category'),
+          headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+            'x-auth-token': userProvider.user.token,
+          },
+        );
+
+        httpErrorHand(
+          response: res,
+          context: context,
+          onSuccess: () {
+            for (int i = 0; i < jsonDecode(res.body).length; i++) {
+              productList.add(
+                Product.fromJson(jsonEncode(jsonDecode(res.body)[i])),
+              );
+            }
+          },
+        );
+      }
+    } catch (e) {
+      showSnackBar(context, e.toString());
+    }
+    return productList;
+  }
+
+  Future<Product> fetchDealOfDay({required BuildContext context}) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     Product product = Product(
       name: '',

@@ -1,6 +1,6 @@
-import 'package:amazon_clone/common/widgets/custom_button.dart';
 import 'package:amazon_clone/common/widgets/stars.dart';
 import 'package:amazon_clone/constants/global_variables.dart';
+import 'package:amazon_clone/features/address/screens/address_screen.dart'; // Thêm import này
 import 'package:amazon_clone/features/product_details/services/product_details_service.dart';
 import 'package:amazon_clone/features/search/screens/search_screen.dart';
 import 'package:amazon_clone/models/product.dart';
@@ -20,16 +20,41 @@ class ProductDetailsScreen extends StatefulWidget {
 }
 
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
-   final ProductDetailsService productDetailsService = ProductDetailsService();
-   double avgRating = 0;
-   double myRating = 0;
-
+  final ProductDetailsService productDetailsService = ProductDetailsService();
+  double avgRating = 0;
+  double myRating = 0;
+  bool isInWishlist = false;
 
   void navigateToSearchScreen(String query) {
     Navigator.pushNamed(context, SearchScreen.routeName, arguments: query);
   }
 
-    @override
+  // Thêm hàm này để navigate đến AddressScreen
+  void navigateToAddress(int sum) {
+    Navigator.pushNamed(
+      context,
+      AddressScreen.routeName,
+      arguments: sum.toString(),
+    );
+  }
+
+  // Thêm hàm này để xử lý Buy Now
+  void buyNow() {
+    // Thêm sản phẩm vào cart trước
+    productDetailsService.addToCart(context: context, product: widget.product);
+
+    // Tính tổng giá của cart hiện tại
+    final user = Provider.of<UserProvider>(context, listen: false).user;
+    double sum = 0;
+    user.cart
+        .map((e) => sum += e['quantity'] * e['product']['price'].toDouble())
+        .toList();
+
+    // Navigate đến address screen với tổng giá
+    navigateToAddress(sum.toInt());
+  }
+
+  @override
   void initState() {
     super.initState();
     double totalRating = 0;
@@ -47,9 +72,22 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   }
 
   void addToCart() {
-    productDetailsService.addToCart(
-      context: context,
-      product: widget.product,
+    productDetailsService.addToCart(context: context, product: widget.product);
+  }
+
+  void toggleWishlist() {
+    setState(() {
+      isInWishlist = !isInWishlist;
+    });
+    // Có thể thêm logic gọi API để lưu wishlist ở đây
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          isInWishlist ? 'Added to Wishlist' : 'Removed from Wishlist',
+        ),
+        duration: const Duration(seconds: 2),
+        backgroundColor: isInWishlist ? Colors.green : Colors.red,
+      ),
     );
   }
 
@@ -72,8 +110,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   height: 42,
                   margin: const EdgeInsets.only(left: 10),
                   child: Material(
-                    borderRadius: BorderRadius.circular(7),
-                    elevation: 1,
+                    borderRadius: BorderRadius.circular(25),
+                    elevation: 2,
                     child: TextFormField(
                       onFieldSubmitted: navigateToSearchScreen,
                       decoration: InputDecoration(
@@ -92,11 +130,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         fillColor: Colors.white,
                         contentPadding: const EdgeInsets.only(top: 10),
                         border: const OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(7)),
+                          borderRadius: BorderRadius.all(Radius.circular(25)),
                           borderSide: BorderSide.none,
                         ),
                         enabledBorder: const OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(7)),
+                          borderRadius: BorderRadius.all(Radius.circular(25)),
                           borderSide: BorderSide(
                             color: Colors.black38,
                             width: 1,
@@ -116,7 +154,14 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 color: Colors.transparent,
                 height: 42,
                 margin: const EdgeInsets.symmetric(horizontal: 10),
-                child: const Icon(Icons.mic, color: Colors.black, size: 25),
+                child: IconButton(
+                  onPressed: toggleWishlist,
+                  icon: Icon(
+                    isInWishlist ? Icons.favorite : Icons.favorite_border,
+                    color: isInWishlist ? Colors.red : Colors.white,
+                    size: 28,
+                  ),
+                ),
               ),
             ],
           ),
@@ -126,122 +171,423 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: [
-                  Text(widget.product.id!), 
-                   Stars(rating: avgRating,),
-                  ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-              child: Text(
-                widget.product.name,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            CarouselSlider(
-              items: widget.product.images.map((i) {
-                return Builder(
-                  builder: (BuildContext context) =>
-                      Image.network(i, fit: BoxFit.contain, height: 200),
-                );
-              }).toList(),
-              options: CarouselOptions(viewportFraction: 1, height: 250),
-            ),
-            Container(color: Colors.black12, height: 5),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: RichText(
-                text: TextSpan(
-                  text: 'Deal Price: ',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
+            // Product Name Card
+            Container(
+              margin: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    spreadRadius: 1,
+                    blurRadius: 5,
+                    offset: const Offset(0, 2),
                   ),
-                  children: [
-                    TextSpan(
-                      text: '\$${widget.product.price}',
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      widget.product.name,
                       style: const TextStyle(
-                        fontSize: 20,
-                        color: Colors.red,
-                        fontWeight: FontWeight.w500,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 16),
+                  Column(
+                    children: [
+                      Stars(rating: avgRating),
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          '${avgRating.toStringAsFixed(1)} ⭐',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.orange,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                widget.product.description,
-                style: const TextStyle(
-                  fontSize: 16, 
-                  color: Colors.black54
-                ),
-              ),
-            ),
+
+            const SizedBox(height: 16),
+
+            // Image Carousel with enhanced styling
             Container(
-              color: Colors.black12, 
-              height: 5
-            ),
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: CustomButton(
-                text: 'Buy Now',
-                onTap: () {},
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.2),
+                    spreadRadius: 2,
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: CustomButton(
-                text: 'Add to Cart',
-                onTap: addToCart,
-                color: const Color.fromRGBO(254, 216, 19, 1),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Container(
-              color: Colors.black12, 
-              height: 5
-            ),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10),
-              child: Text(
-                'Rate The Product',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: CarouselSlider(
+                  items: widget.product.images.map((i) {
+                    return Builder(
+                      builder: (BuildContext context) => Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Image.network(
+                          i,
+                          fit: BoxFit.contain,
+                          height: 280,
+                          width: double.infinity,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                  options: CarouselOptions(
+                    viewportFraction: 1,
+                    height: 280,
+                    autoPlay: false,
+                    enlargeCenterPage: true,
+                  ),
                 ),
               ),
             ),
-            RatingBar.builder(
-              initialRating: myRating,
-              minRating: 1,
-              direction: Axis.horizontal,
-              allowHalfRating: true,
-              itemCount: 5,
-              itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
-              itemBuilder: (context, _) => const Icon(
-                Icons.star,
-                color: GlobalVariables.secondaryColor,
+
+            const SizedBox(height: 20),
+
+            // Price and Description Card
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    spreadRadius: 1,
+                    blurRadius: 5,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
-              onRatingUpdate: (rating) {
-                  productDetailsService.rateProduct(
-                  context: context,
-                  product: widget.product,
-                  rating: rating,
-                );
-              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.red.withOpacity(0.1),
+                          Colors.orange.withOpacity(0.1),
+                        ],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: RichText(
+                      text: TextSpan(
+                        text: 'Deal Price: ',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: '\$${widget.product.price}',
+                            style: const TextStyle(
+                              fontSize: 28,
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Description',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    widget.product.description,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.black54,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+              ),
             ),
+
+            const SizedBox(height: 20),
+
+            // Action Buttons
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    spreadRadius: 1,
+                    blurRadius: 5,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  // Buy Now Button
+                  Container(
+                    width: double.infinity,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFFF9900), Color(0xFFFF6B35)],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                      borderRadius: BorderRadius.circular(25),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.orange.withOpacity(0.3),
+                          spreadRadius: 1,
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: ElevatedButton(
+                      onPressed: buyNow,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                      ),
+                      child: const Text(
+                        'Buy Now',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Action Buttons Row
+                  Row(
+                    children: [
+                      // Add to Cart Button
+                      Expanded(
+                        child: Container(
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: const Color.fromRGBO(254, 216, 19, 1),
+                            borderRadius: BorderRadius.circular(25),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.yellow.withOpacity(0.3),
+                                spreadRadius: 1,
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: ElevatedButton.icon(
+                            onPressed: addToCart,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                            ),
+                            icon: const Icon(
+                              Icons.shopping_cart,
+                              color: Colors.black87,
+                              size: 20,
+                            ),
+                            label: const Text(
+                              'Add to Cart',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(width: 12),
+
+                      // Wishlist Button
+                      Container(
+                        height: 50,
+                        width: 50,
+                        decoration: BoxDecoration(
+                          color: isInWishlist
+                              ? Colors.red
+                              : Colors.grey.shade200,
+                          borderRadius: BorderRadius.circular(25),
+                          boxShadow: [
+                            BoxShadow(
+                              color: (isInWishlist ? Colors.red : Colors.grey)
+                                  .withOpacity(0.3),
+                              spreadRadius: 1,
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: IconButton(
+                          onPressed: toggleWishlist,
+                          icon: Icon(
+                            isInWishlist
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: isInWishlist
+                                ? Colors.white
+                                : Colors.grey.shade600,
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Rating Section
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    spreadRadius: 1,
+                    blurRadius: 5,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.star_rate,
+                        color: Colors.orange,
+                        size: 28,
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Rate This Product',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Center(
+                    child: RatingBar.builder(
+                      initialRating: myRating,
+                      minRating: 1,
+                      direction: Axis.horizontal,
+                      allowHalfRating: true,
+                      itemCount: 5,
+                      itemSize: 35,
+                      glow: true,
+                      glowColor: Colors.orange.withOpacity(0.5),
+                      itemPadding: const EdgeInsets.symmetric(horizontal: 6.0),
+                      itemBuilder: (context, _) =>
+                          const Icon(Icons.star, color: Colors.orange),
+                      onRatingUpdate: (rating) {
+                        productDetailsService.rateProduct(
+                          context: context,
+                          product: widget.product,
+                          rating: rating,
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  if (myRating > 0)
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          'Your rating: ${myRating.toStringAsFixed(1)} ⭐',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.orange,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
           ],
         ),
       ),

@@ -21,6 +21,8 @@ class AdminServices {
     required double quantity,
     required String category,
     required List<File> images,
+    VoidCallback? onSuccess,
+    VoidCallback? onError,
   }) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
@@ -58,11 +60,18 @@ class AdminServices {
         context: context,
         onSuccess: () {
           showSnackBar(context, 'Product added successfully!');
-          Navigator.pop(context);
+          if (onSuccess != null) {
+            onSuccess();
+          } else {
+            Navigator.pop(context);
+          }
         },
       );
     } catch (e) {
       showSnackBar(context, e.toString());
+      if (onError != null) {
+        onError();
+      }
     }
   }
 

@@ -3,11 +3,11 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 class NetworkConfig {
-  // ⚠️ THAY ĐỔI IP VÀ PORT NÀY THEO THIẾT LẬP CỦA BẠN
-  static const String hostIP = "192.168.1.7"; // <-- Thay IP này
-  static const String port = "5000"; // <-- Đổi port từ 3000 thành 5000
+  // ⚠️ CHANGE THIS IP AND PORT ACCORDING TO YOUR SETUP
+  static const String hostIP = "192.168.1.7"; // <-- Change this IP
+  static const String port = "5000"; // <-- Change port from 3000 to 5000
 
-  /// Base URL cho API server (Bun TypeScript)
+  /// Base URL for API server (Bun TypeScript)
   static String get baseUrl {
     if (kDebugMode) {
       // Development mode
@@ -23,11 +23,11 @@ class NetworkConfig {
       }
     } else {
       // Production mode
-      return "https://your-production-domain.com"; // Thay bằng domain thật
+      return "https://your-production-domain.com"; // Replace with real domain
     }
   }
 
-  /// Email API endpoint - Khớp với Bun server endpoint
+  /// Email API endpoint - Matches Bun server endpoint
   static String get emailApi => "$baseUrl/api";
 
   // Debug method to check configuration

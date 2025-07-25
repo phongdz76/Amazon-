@@ -10,29 +10,44 @@ class BelowAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = Provider.of<UserProvider>(context).user;
     return Container(
-      decoration: const BoxDecoration(
-        gradient: GlobalVariables.appBarGradient,
-      ),
+      decoration: const BoxDecoration(gradient: GlobalVariables.appBarGradient),
       padding: const EdgeInsets.only(left: 15, right: 15, top: 10, bottom: 10),
       child: Row(
         children: [
-          RichText(
-            text: TextSpan(
-              text: 'Hello, ',
-              style: const TextStyle(
-                fontSize: 22,
-                color: Colors.black,
-              ),
-              children: [
-                TextSpan(
-                  text: user.name,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
+          // Avatar
+          GestureDetector(
+            onTap: () {
+              Navigator.pushNamed(context, '/profile');
+            },
+            child: CircleAvatar(
+              radius: 25,
+              backgroundColor: Colors.white,
+              backgroundImage: user.avatar != null
+                  ? NetworkImage(user.avatar!)
+                  : null,
+              child: user.avatar == null
+                  ? const Icon(Icons.person, color: Colors.grey, size: 30)
+                  : null,
+            ),
+          ),
+          const SizedBox(width: 15),
+          // Greeting text
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                text: 'Hello, ',
+                style: const TextStyle(fontSize: 22, color: Colors.black),
+                children: [
+                  TextSpan(
+                    text: user.name,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],

@@ -7,9 +7,9 @@ class AddressBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<UserProvider>(context).user; 
+    final user = Provider.of<UserProvider>(context).user;
     return Container(
-      height: 40,
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [
@@ -18,38 +18,64 @@ class AddressBox extends StatelessWidget {
           ],
           stops: [0.5, 1.0],
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      padding: const EdgeInsets.only(left: 10),
       child: Row(
         children: [
-          const Icon(
-            Icons.location_on_outlined,
-            size: 25,
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(
+              Icons.location_on,
+              size: 20,
+              color: Colors.black87,
+            ),
           ),
-
+          const SizedBox(width: 12),
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 5),
-              child: Text(
-                'Deliver to ${user.name} - ${user.address}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.w500,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Deliver to',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black54,
+                  ),
                 ),
-                overflow: TextOverflow.ellipsis,
-              ),
+                const SizedBox(height: 2),
+                Text(
+                  '${user.name} - ${user.address.isNotEmpty ? user.address : 'Address not updated'}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ],
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.only(
-              left: 5,
-              top: 2,
-            ),
-            child: Icon(
-              Icons.arrow_drop_down_outlined,
-              size: 25,
+          Container(
+            padding: const EdgeInsets.all(4),
+            child: const Icon(
+              Icons.keyboard_arrow_down,
+              size: 20,
+              color: Colors.black87,
             ),
           ),
-        ],  
+        ],
       ),
     );
   }

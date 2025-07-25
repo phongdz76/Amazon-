@@ -1,4 +1,6 @@
 import 'package:amazon_clone/common/widgets/bottom_bar.dart';
+import 'package:amazon_clone/features/account/screens/profile_screen.dart';
+import 'package:amazon_clone/features/account/screens/wishlist_screen.dart';
 import 'package:amazon_clone/features/address/screens/address_screen.dart';
 import 'package:amazon_clone/features/admin/screens/add_product_screen.dart';
 import 'package:amazon_clone/features/admin/screens/admin_screen.dart';
@@ -8,6 +10,7 @@ import 'package:amazon_clone/features/auth/screens/auth_screen.dart';
 import 'package:amazon_clone/features/auth/screens/forgot_password_screen.dart';
 import 'package:amazon_clone/features/home/screens/category_deals_screen.dart';
 import 'package:amazon_clone/features/home/screens/home_screen.dart';
+import 'package:amazon_clone/features/livesream/liveStream.dart' hide Product;
 import 'package:amazon_clone/features/order_details/screens/order_details.dart';
 import 'package:amazon_clone/features/product_details/screens/product_details_screen.dart';
 import 'package:amazon_clone/features/search/screens/search_screen.dart';
@@ -105,6 +108,23 @@ Route<dynamic> generateRoute(RouteSettings routeSetting) {
       return MaterialPageRoute(
         builder: (_) =>
             ResetPasswordScreen(email: args['email']!, otp: args['otp']!),
+      );
+
+    case ProfileScreen.routeName:
+      return MaterialPageRoute(
+        settings: routeSetting,
+        builder: (_) => const ProfileScreen(),
+      );
+
+    case WishlistScreen.routeName:
+      return MaterialPageRoute(
+        settings: routeSetting,
+        builder: (_) => const WishlistScreen(),
+      );
+    case LiveStreamHomePage.routeName:
+      return MaterialPageRoute(
+        settings: routeSetting,
+        builder: (_) => const LiveStreamHomePage(),
       );
     default:
       return MaterialPageRoute(

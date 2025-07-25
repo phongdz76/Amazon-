@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:amazon_clone/common/widgets/custom_textfield.dart';
+import 'package:amazon_clone/common/widgets/loader.dart';
 import 'package:amazon_clone/constants/global_variables.dart';
 import 'package:amazon_clone/constants/utils.dart';
 import 'package:amazon_clone/features/admin/services/admin_services.dart';
@@ -26,6 +27,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
   String category = 'Mobiles';
   List<File> images = [];
   final _addProductformKey = GlobalKey<FormState>();
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -46,6 +48,10 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
   void sellProduct() {
     if (_addProductformKey.currentState!.validate() && images.isNotEmpty) {
+      setState(() {
+        _isLoading = true;
+      });
+
       adminServices.sellProduct(
         context: context,
         name: productNameController.text,
@@ -54,6 +60,25 @@ class _AddProductScreenState extends State<AddProductScreen> {
         quantity: double.parse(quantityController.text),
         category: category,
         images: images,
+        onSuccess: () {
+          setState(() {
+            _isLoading = false;
+          });
+          // Clear form after successful submission
+          productNameController.clear();
+          descriptionController.clear();
+          priceController.clear();
+          quantityController.clear();
+          setState(() {
+            images = [];
+            category = 'Mobiles';
+          });
+        },
+        onError: () {
+          setState(() {
+            _isLoading = false;
+          });
+        },
       );
     } else {
       showSnackBar(context, 'Please fill all fields and select images');
@@ -85,7 +110,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
+      body: _isLoading
+          ? const Loader()
+          : SingleChildScrollView(
         child: Form(
           key: _addProductformKey,
           child: Padding(
@@ -191,14 +218,20 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   margin: const EdgeInsets.symmetric(horizontal: 20),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    gradient: const LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: [Color(0xFF2196F3), Color(0xFF1976D2)],
-                    ),
+                    gradient: _isLoading
+                        ? LinearGradient(
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                            colors: [Colors.grey.shade400, Colors.grey.shade500],
+                          )
+                        : const LinearGradient(
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                            colors: [Color(0xFF2196F3), Color(0xFF1976D2)],
+                          ),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF2196F3).withOpacity(0.3),
+                        color: (_isLoading ? Colors.grey.shade400 : const Color(0xFF2196F3)).withOpacity(0.3),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                         spreadRadius: 0,
@@ -209,28 +242,38 @@ class _AddProductScreenState extends State<AddProductScreen> {
                     color: Colors.transparent,
                     child: InkWell(
                       borderRadius: BorderRadius.circular(16),
-                      onTap: sellProduct,
+                      onTap: _isLoading ? null : sellProduct,
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 24),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Container(
-                              padding: const EdgeInsets.all(2),
-                              decoration: const BoxDecoration(
-                                color: Colors.white24,
-                                shape: BoxShape.circle,
+                            if (_isLoading)
+                              const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            else
+                              Container(
+                                padding: const EdgeInsets.all(2),
+                                decoration: const BoxDecoration(
+                                  color: Colors.white24,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.sell_rounded,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
                               ),
-                              child: const Icon(
-                                Icons.sell_rounded,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                            ),
                             const SizedBox(width: 12),
-                            const Text(
-                              'Sell Product',
-                              style: TextStyle(
+                            Text(
+                              _isLoading ? 'Adding Product...' : 'Sell Product',
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,

@@ -1,5 +1,6 @@
 import 'package:amazon_clone/features/cart/services/cart_services.dart';
 import 'package:amazon_clone/features/product_details/services/product_details_service.dart';
+import 'package:amazon_clone/features/address/screens/address_screen.dart';
 import 'package:amazon_clone/models/product.dart';
 import 'package:amazon_clone/providers/user_provider.dart';
 import 'package:flutter/material.dart';
@@ -56,6 +57,18 @@ class _CartProductState extends State<CartProduct> {
           ],
         );
       },
+    );
+  }
+
+  void buyNow(Product product, int quantity) {
+    // Calculate total amount for this product
+    double totalAmount = product.price * quantity;
+
+    // Navigate to address screen for checkout
+    Navigator.pushNamed(
+      context,
+      AddressScreen.routeName,
+      arguments: totalAmount.toStringAsFixed(2),
     );
   }
 
@@ -395,9 +408,7 @@ class _CartProductState extends State<CartProduct> {
               width: double.infinity,
               height: 44,
               child: ElevatedButton(
-                onPressed: () {
-                  // TODO: Implement buy now
-                },
+                onPressed: () => buyNow(product, quantity),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFEE4D2D),
                   foregroundColor: Colors.white,

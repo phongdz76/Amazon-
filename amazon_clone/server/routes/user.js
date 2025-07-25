@@ -59,6 +59,37 @@ userRouter.delete("/api/remove-from-cart/:id", auth, async (req, res) => {
   }
 });
 
+// update user profile
+userRouter.post("/api/update-profile", auth, async (req, res) => {
+  try {
+    const { name, phone, address, avatar } = req.body;
+    let user = await User.findById(req.user);
+    
+    if (name) user.name = name;
+    if (phone !== undefined) user.phone = phone;
+    if (address) user.address = address;
+    if (avatar) user.avatar = avatar;
+    
+    user = await user.save();
+    res.json(user);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// save user phone
+userRouter.post("/api/save-user-phone", auth, async (req, res) => {
+  try {
+    const { phone } = req.body;
+    let user = await User.findById(req.user);
+    user.phone = phone;
+    user = await user.save();
+    res.json(user);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // save user address
 userRouter.post("/api/save-user-address", auth, async (req, res) => {
   try {

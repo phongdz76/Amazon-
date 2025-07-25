@@ -45,5 +45,10 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	////camera permission
+	<key>NSCameraUsageDescription</key>//camera permission
+<string>Camera permission is required for live streaming</string>
+<key>NSMicrophoneUsageDescription</key>
+<string>Microphone permission is required for live streaming</string>
 </dict>
 </plist>

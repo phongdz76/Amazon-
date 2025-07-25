@@ -49,7 +49,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
 
   void _verifyOTP() async {
     if (_otpController.text.length != 6) {
-      _showSnackBar('Vui lòng nhập đầy đủ 6 chữ số', isError: true);
+      _showSnackBar('Please enter all 6 digits', isError: true);
       return;
     }
 
@@ -70,7 +70,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
         );
       }
     } catch (e) {
-      _showSnackBar('Có lỗi xảy ra: ${e.toString()}', isError: true);
+      _showSnackBar('An error occurred: ${e.toString()}', isError: true);
     } finally {
       setState(() => _isLoading = false);
     }
@@ -90,7 +90,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
         _otpController.clear();
       }
     } catch (e) {
-      _showSnackBar('Không thể gửi lại mã: ${e.toString()}', isError: true);
+      _showSnackBar('Unable to resend code: ${e.toString()}', isError: true);
     } finally {
       setState(() => _isResending = false);
     }

@@ -40,7 +40,10 @@ class _PostsScreenState extends State<PostsScreen> {
   }
 
   void navigateToAddProduct() {
-    Navigator.pushNamed(context, AddProductScreen.routeName);
+    Navigator.pushNamed(context, AddProductScreen.routeName).then((_) {
+      // Refresh danh sách sau khi thêm sản phẩm mới
+      fetchAllProducts();
+    });
   }
 
   void navigateToEditProduct(Product product) {

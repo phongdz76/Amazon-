@@ -44,6 +44,40 @@ class AddressServices {
     }
   }
 
+  void saveUserPhone({
+    required BuildContext context,
+    required String phone,
+  }) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    try {
+      http.Response res = await http.post(
+        Uri.parse('$uri/api/save-user-phone'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'x-auth-token': userProvider.user.token,
+        },
+        body: jsonEncode({
+          'phone': phone,
+        }),
+      );
+
+      httpErrorHand(
+        response: res,
+        context: context,
+        onSuccess: () {
+          User user = userProvider.user.copyWith(
+            phone: jsonDecode(res.body)['phone'],
+          );
+
+          userProvider.setUserFromModel(user);
+        },
+      );
+    } catch (e) {
+      showSnackBar(context, e.toString());
+    }
+  }
+
   // get all the products
   void placeOrder({
     required BuildContext context,

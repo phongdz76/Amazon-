@@ -42,7 +42,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
   @override
   void initState() {
     super.initState();
-    // Khởi tạo với dữ liệu sản phẩm hiện tại
+    // Initialize with current product data
     _productNameController = TextEditingController(text: widget.product.name);
     _descriptionController = TextEditingController(
       text: widget.product.description,

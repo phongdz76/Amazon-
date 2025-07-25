@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
         trim: true,
         validate: {
         validator: (value) => {
-         // Email phải có định dạng hợp lệ
+         // Email must have a valid format
         const re =
           /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
         return value.match(re);
@@ -28,16 +28,16 @@ const userSchema = new mongoose.Schema({
       maxlength: 128, 
       validate: {
       validator: (value) => {
-      // Password phải có ít nhất 8 ký tự và chứa ít nhất 3 trong 4 yêu cầu sau:
-      // 1 chữ hoa, 1 chữ thường, 1 số, 1 ký tự đặc biệt
+      // Password must have at least 8 characters and contain at least 3 of the following 4 requirements:
+      // 1 uppercase, 1 lowercase, 1 number, 1 special character
       let score = 0;
       
-      if (/[a-z]/.test(value)) score++; // chữ thường
-      if (/[A-Z]/.test(value)) score++; // chữ hoa  
-      if (/\d/.test(value)) score++;    // số
-      if (/[@$!%*?&]/.test(value)) score++; // ký tự đặc biệt
+      if (/[a-z]/.test(value)) score++; // lowercase
+      if (/[A-Z]/.test(value)) score++; // uppercase
+      if (/\d/.test(value)) score++;    // number
+      if (/[@$!%*?&]/.test(value)) score++; // special character
       
-      // Không có khoảng trắng và cần ít nhất 3/4 tiêu chí
+      // No spaces and needs at least 3/4 criteria
       return !/\s/.test(value) && score >= 3;
      },
       message: "Password must be 8+ characters with at least 3 of: uppercase, lowercase, number, special character (@$!%*?&), and no spaces",
@@ -60,6 +60,14 @@ const userSchema = new mongoose.Schema({
          },
       }
     ],
+    phone: {
+       type: String,
+       default: "",
+    },
+    avatar: {
+       type: String,
+       default: "",
+    },
 });
 const User = mongoose.model("User", userSchema);
 module.exports = User;

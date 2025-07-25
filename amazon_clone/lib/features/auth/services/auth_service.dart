@@ -101,37 +101,44 @@ class AuthService {
   // get user data (giữ nguyên)
   void getUserData(BuildContext context) async {
     try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? token = prefs.getString('x-auth-token');
+      var userProvider = Provider.of<UserProvider>(context, listen: false);
 
-      if (token == null) {
-        prefs.setString('x-auth-token', '');
-      }
+      // First try to load from SharedPreferences
+      await userProvider.loadUserFromPrefs();
 
-      var tokenRes = await http.post(
-        Uri.parse('$uri/tokenIsValid'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'x-auth-token': token!,
-        },
-      );
-
-      var response = jsonDecode(tokenRes.body);
-
-      if (response == true) {
-        http.Response userRes = await http.get(
-          Uri.parse('$uri/'),
+      // If we have a token, verify it with server
+      if (userProvider.user.token.isNotEmpty) {
+        var tokenRes = await http.post(
+          Uri.parse('$uri/tokenIsValid'),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
-            'x-auth-token': token,
+            'x-auth-token': userProvider.user.token,
           },
         );
 
-        var userProvider = Provider.of<UserProvider>(context, listen: false);
-        userProvider.setUser(userRes.body);
+        var response = jsonDecode(tokenRes.body);
+
+        if (response == true) {
+          // Token is still valid, get fresh user data
+          http.Response userRes = await http.get(
+            Uri.parse('$uri/'),
+            headers: <String, String>{
+              'Content-Type': 'application/json; charset=UTF-8',
+              'x-auth-token': userProvider.user.token,
+            },
+          );
+
+          if (userRes.statusCode == 200) {
+            userProvider.setUser(userRes.body);
+          }
+        } else {
+          // Token is invalid, clear user data
+          await userProvider.clearUser();
+        }
       }
     } catch (e) {
-      showSnackBar(context, e.toString());
+      print('Error getting user data: $e');
+      // Don't show error to user as this runs on app startup
     }
   }
 
@@ -140,7 +147,7 @@ class AuthService {
     return (100000 + Random().nextInt(900000)).toString();
   }
 
-  // Gửi OTP reset password - SỬA LẠI
+  // Send OTP for reset password
   Future<bool> sendResetOTP({
     required BuildContext context,
     required String email,
@@ -148,7 +155,7 @@ class AuthService {
     try {
       String otp = _generateOTP();
 
-      // Lưu OTP vào bộ nhớ
+      // Store OTP in memory
       _otpStorage[email] = {
         'otp': otp,
         'expiresAt': DateTime.now().add(Duration(minutes: 10)),
@@ -159,25 +166,25 @@ class AuthService {
       print('OTP: $otp');
       print('API URL: ${NetworkConfig.emailApi}');
 
-      // Gọi Bun server API - SỬA LẠI BODY
+      // Call Bun server API
       http.Response res = await http
           .post(
             Uri.parse(NetworkConfig.emailApi),
             body: jsonEncode({
-              'to': email, // Đảm bảo field này khớp với Bun server
-              'subject': 'Mã OTP đặt lại mật khẩu - Amazon Clone',
+              'to': email, // Ensure this field matches Bun server
+              'subject': 'Password Reset OTP - Amazon Clone',
               'message':
-                  '''Xin chào,
+                  '''Hello,
 
-Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản Amazon Clone.
+You have requested to reset your password for your Amazon Clone account.
 
-Mã OTP của bạn là: $otp
+Your OTP code is: $otp
 
-Mã này có hiệu lực trong 10 phút.
+This code is valid for 10 minutes.
 
-Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.
+If you did not request a password reset, please ignore this email.
 
-Trân trọng,
+Best regards,
 Amazon Clone Team''',
             }),
             headers: <String, String>{
@@ -190,24 +197,24 @@ Amazon Clone Team''',
       print('Response body: ${res.body}');
 
       if (res.statusCode == 200) {
-        showSnackBar(context, 'Mã OTP đã được gửi đến email của bạn!');
+        showSnackBar(context, 'OTP code has been sent to your email!');
         return true;
       } else {
         print('Error response: ${res.body}');
         showSnackBar(
           context,
-          'Không thể gửi email. Vui lòng thử lại. (Status: ${res.statusCode})',
+          'Unable to send email. Please try again. (Status: ${res.statusCode})',
         );
         return false;
       }
     } catch (e) {
       print('Exception occurred: $e');
-      showSnackBar(context, 'Lỗi kết nối server: ${e.toString()}');
+      showSnackBar(context, 'Server connection error: ${e.toString()}');
       return false;
     }
   }
 
-  // Xác thực OTP
+  // Verify OTP
   Future<bool> verifyResetOTP({
     required BuildContext context,
     required String email,
@@ -215,10 +222,7 @@ Amazon Clone Team''',
   }) async {
     try {
       if (!_otpStorage.containsKey(email)) {
-        showSnackBar(
-          context,
-          'Không tìm thấy mã OTP. Vui lòng yêu cầu mã mới.',
-        );
+        showSnackBar(context, 'OTP code not found. Please request a new code.');
         return false;
       }
 
@@ -226,20 +230,23 @@ Amazon Clone Team''',
 
       if (DateTime.now().isAfter(otpData['expiresAt'])) {
         _otpStorage.remove(email);
-        showSnackBar(context, 'Mã OTP đã hết hạn. Vui lòng yêu cầu mã mới.');
+        showSnackBar(
+          context,
+          'OTP code has expired. Please request a new code.',
+        );
         return false;
       }
 
       if (otpData['otp'] != otp) {
-        showSnackBar(context, 'Mã OTP không đúng. Vui lòng thử lại.');
+        showSnackBar(context, 'Incorrect OTP code. Please try again.');
         return false;
       }
 
       _otpStorage[email]!['verified'] = true;
-      showSnackBar(context, 'Xác thực OTP thành công!');
+      showSnackBar(context, 'OTP verification successful!');
       return true;
     } catch (e) {
-      showSnackBar(context, 'Lỗi khi xác thực OTP.');
+      showSnackBar(context, 'Error verifying OTP.');
       return false;
     }
   }
@@ -253,24 +260,24 @@ Amazon Clone Team''',
   }) async {
     try {
       if (!_otpStorage.containsKey(email)) {
-        showSnackBar(context, 'Phiên làm việc đã hết hạn. Vui lòng thử lại.');
+        showSnackBar(context, 'Session has expired. Please try again.');
         return false;
       }
 
       var otpData = _otpStorage[email]!;
 
       if (!otpData['verified'] || otpData['otp'] != otp) {
-        showSnackBar(context, 'Mã OTP không hợp lệ hoặc chưa được xác thực.');
+        showSnackBar(context, 'Invalid OTP or not verified.');
         return false;
       }
 
       if (DateTime.now().isAfter(otpData['expiresAt'])) {
         _otpStorage.remove(email);
-        showSnackBar(context, 'Mã OTP đã hết hạn.');
+        showSnackBar(context, 'OTP code has expired.');
         return false;
       }
 
-      // Tạo reset token từ forgot-password API trước
+      // Create reset token from forgot-password API first
       http.Response forgotResponse = await http.post(
         Uri.parse('$uri/api/forgot-password'),
         body: jsonEncode({'email': email}),
@@ -280,14 +287,17 @@ Amazon Clone Team''',
       );
 
       if (forgotResponse.statusCode != 200) {
-        showSnackBar(context, 'Không thể tạo token reset. Vui lòng thử lại.');
+        showSnackBar(
+          context,
+          'Unable to create reset token. Please try again.',
+        );
         return false;
       }
 
       var forgotData = jsonDecode(forgotResponse.body);
       String resetToken = forgotData['resetToken'];
 
-      // Gọi API reset password thực sự
+      // Call actual reset password API
       http.Response res = await http.post(
         Uri.parse('$uri/api/reset-password'),
         body: jsonEncode({'token': resetToken, 'newPassword': newPassword}),
@@ -300,25 +310,25 @@ Amazon Clone Team''',
         response: res,
         context: context,
         onSuccess: () {
-          // Xóa OTP khỏi storage chỉ khi thành công
+          // Remove OTP from storage only on success
           _otpStorage.remove(email);
-          showSnackBar(context, 'Đổi mật khẩu thành công!');
+          showSnackBar(context, 'Password changed successfully!');
         },
       );
 
       return res.statusCode == 200;
     } catch (e) {
-      showSnackBar(context, 'Lỗi khi đổi mật khẩu: ${e.toString()}');
+      showSnackBar(context, 'Error changing password: ${e.toString()}');
       return false;
     }
   }
 
-  // Gửi lại OTP
+  // Resend OTP
   Future<bool> resendOTP({
     required BuildContext context,
     required String email,
   }) async {
-    // Kiểm tra spam (không cho gửi quá nhanh)
+    // Check for spam (don't allow sending too quickly)
     if (_otpStorage.containsKey(email)) {
       var otpData = _otpStorage[email]!;
       var timeSinceGenerated = DateTime.now().difference(
@@ -326,7 +336,7 @@ Amazon Clone Team''',
       );
 
       if (timeSinceGenerated.inSeconds < 60) {
-        showSnackBar(context, 'Vui lòng đợi trước khi yêu cầu mã mới.');
+        showSnackBar(context, 'Please wait before requesting a new code.');
         return false;
       }
     }

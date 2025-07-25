@@ -10,10 +10,7 @@ import 'package:provider/provider.dart';
 class AddressScreen extends StatefulWidget {
   static const String routeName = '/address';
   final String totalAmount;
-  const AddressScreen({
-    super.key,
-    required this.totalAmount,
-  });
+  const AddressScreen({super.key, required this.totalAmount});
 
   @override
   State<AddressScreen> createState() => _AddressScreenState();
@@ -24,12 +21,14 @@ class _AddressScreenState extends State<AddressScreen> {
   final TextEditingController areaController = TextEditingController();
   final TextEditingController pincodeController = TextEditingController();
   final TextEditingController cityController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
   final _addressFormKey = GlobalKey<FormState>();
 
   String addressToBeUsed = "";
+  String phoneToBeUsed = "";
   List<PaymentItem> paymentItems = [];
   final AddressServices addressServices = AddressServices();
-  
+
   // Add payment configuration futures
   late Future<PaymentConfiguration> _applePayConfigFuture;
   late Future<PaymentConfiguration> _googlePayConfigFuture;
@@ -44,10 +43,18 @@ class _AddressScreenState extends State<AddressScreen> {
         status: PaymentItemStatus.final_price,
       ),
     );
-    
+
     // Initialize payment configurations
     _applePayConfigFuture = PaymentConfiguration.fromAsset('applepay.json');
     _googlePayConfigFuture = PaymentConfiguration.fromAsset('gpay.json');
+
+    // Initialize phone from user data
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = Provider.of<UserProvider>(context, listen: false).user;
+      if (user.phone != null && user.phone!.isNotEmpty) {
+        phoneController.text = user.phone!;
+      }
+    });
   }
 
   @override
@@ -57,17 +64,25 @@ class _AddressScreenState extends State<AddressScreen> {
     areaController.dispose();
     pincodeController.dispose();
     cityController.dispose();
+    phoneController.dispose();
   }
 
   void onApplePayResult(res) {
     print('Apple Pay Result: $res');
     try {
-      if (Provider.of<UserProvider>(context, listen: false)
-          .user
-          .address
-          .isEmpty) {
+      if (Provider.of<UserProvider>(
+        context,
+        listen: false,
+      ).user.address.isEmpty) {
         addressServices.saveUserAddress(
-            context: context, address: addressToBeUsed);
+          context: context,
+          address: addressToBeUsed,
+        );
+      }
+      if (phoneToBeUsed.isNotEmpty &&
+          Provider.of<UserProvider>(context, listen: false).user.phone !=
+              phoneToBeUsed) {
+        addressServices.saveUserPhone(context: context, phone: phoneToBeUsed);
       }
       addressServices.placeOrder(
         context: context,
@@ -83,12 +98,19 @@ class _AddressScreenState extends State<AddressScreen> {
   void onGooglePayResult(res) {
     print('Google Pay Result: $res');
     try {
-      if (Provider.of<UserProvider>(context, listen: false)
-          .user
-          .address
-          .isEmpty) {
+      if (Provider.of<UserProvider>(
+        context,
+        listen: false,
+      ).user.address.isEmpty) {
         addressServices.saveUserAddress(
-            context: context, address: addressToBeUsed);
+          context: context,
+          address: addressToBeUsed,
+        );
+      }
+      if (phoneToBeUsed.isNotEmpty &&
+          Provider.of<UserProvider>(context, listen: false).user.phone !=
+              phoneToBeUsed) {
+        addressServices.saveUserPhone(context: context, phone: phoneToBeUsed);
       }
       addressServices.placeOrder(
         context: context,
@@ -103,8 +125,10 @@ class _AddressScreenState extends State<AddressScreen> {
 
   void payPressed(String addressFromProvider) {
     addressToBeUsed = "";
+    phoneToBeUsed = "";
 
-    bool isForm = flatBuildingController.text.isNotEmpty ||
+    bool isForm =
+        flatBuildingController.text.isNotEmpty ||
         areaController.text.isNotEmpty ||
         pincodeController.text.isNotEmpty ||
         cityController.text.isNotEmpty;
@@ -121,11 +145,17 @@ class _AddressScreenState extends State<AddressScreen> {
     } else {
       showSnackBar(context, 'ERROR');
     }
+
+    // Handle phone number
+    if (phoneController.text.isNotEmpty) {
+      phoneToBeUsed = phoneController.text;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     var address = context.watch<UserProvider>().user.address;
+    var phone = context.watch<UserProvider>().user.phone;
 
     return Scaffold(
       appBar: PreferredSize(
@@ -143,33 +173,62 @@ class _AddressScreenState extends State<AddressScreen> {
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
-              if (address.isNotEmpty)
+              if (address.isNotEmpty || (phone != null && phone.isNotEmpty))
                 Column(
                   children: [
-                    Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.black12,
+                    if (address.isNotEmpty)
+                      Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black12),
                         ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          address,
-                          style: const TextStyle(
-                            fontSize: 18,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Address:',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              Text(
+                                address,
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    const Text(
-                      'OR',
-                      style: TextStyle(
-                        fontSize: 18,
+                    if (phone != null && phone.isNotEmpty)
+                      Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black12),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Phone:',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              Text(phone, style: const TextStyle(fontSize: 16)),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
+                    const SizedBox(height: 20),
+                    const Text('OR', style: TextStyle(fontSize: 18)),
                     const SizedBox(height: 20),
                   ],
                 ),
@@ -195,6 +254,12 @@ class _AddressScreenState extends State<AddressScreen> {
                     CustomTextField(
                       controller: cityController,
                       hintText: 'Town/City',
+                    ),
+                    const SizedBox(height: 10),
+                    CustomTextField(
+                      controller: phoneController,
+                      hintText: 'Phone Number',
+                      keyboardType: TextInputType.phone,
                     ),
                     const SizedBox(height: 10),
                   ],
