@@ -123,6 +123,73 @@ class _AddressScreenState extends State<AddressScreen> {
     }
   }
 
+  void onCODPayment() {
+    print('COD Payment initiated');
+    try {
+      if (Provider.of<UserProvider>(
+        context,
+        listen: false,
+      ).user.address.isEmpty) {
+        addressServices.saveUserAddress(
+          context: context,
+          address: addressToBeUsed,
+        );
+      }
+      if (phoneToBeUsed.isNotEmpty &&
+          Provider.of<UserProvider>(context, listen: false).user.phone !=
+              phoneToBeUsed) {
+        addressServices.saveUserPhone(context: context, phone: phoneToBeUsed);
+      }
+      addressServices.placeOrderCOD(
+        context: context,
+        address: addressToBeUsed,
+        totalSum: double.parse(widget.totalAmount),
+      );
+    } catch (e) {
+      print('COD Payment Error: $e');
+      showSnackBar(context, 'COD Order failed: ${e.toString()}');
+    }
+  }
+
+  void showCODConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Cash on Delivery'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Order Total: \$${widget.totalAmount}'),
+              SizedBox(height: 10),
+              Text('Payment Method: Cash on Delivery'),
+              SizedBox(height: 10),
+              Text('You will pay when the order is delivered to your address.'),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                onCODPayment();
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+              child: Text(
+                'Confirm Order',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void payPressed(String addressFromProvider) {
     addressToBeUsed = "";
     phoneToBeUsed = "";
@@ -309,6 +376,45 @@ class _AddressScreenState extends State<AddressScreen> {
                     return const SizedBox.shrink();
                   }
                 },
+              ),
+              const SizedBox(height: 10),
+              // Cash on Delivery Button
+              Container(
+                width: double.infinity,
+                height: 50,
+                margin: const EdgeInsets.only(top: 15),
+                child: ElevatedButton(
+                  onPressed: () {
+                    try {
+                      payPressed(address);
+                      showCODConfirmationDialog();
+                    } catch (e) {
+                      showSnackBar(context, e.toString());
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    foregroundColor: Colors.white,
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.money, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Cash on Delivery (COD)',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),

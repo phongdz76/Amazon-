@@ -1,21 +1,23 @@
 import 'package:amazon_clone/common/widgets/loader.dart';
 import 'package:amazon_clone/constants/global_variables.dart';
-import 'package:amazon_clone/features/account/screens/all_orders_screen.dart';
 import 'package:amazon_clone/features/account/services/account_services.dart';
 import 'package:amazon_clone/features/order_details/screens/order_details.dart';
+import 'package:amazon_clone/features/search/screens/search_screen.dart';
 import 'package:amazon_clone/models/order.dart';
 import 'package:flutter/material.dart';
 
-class Orders extends StatefulWidget {
-  const Orders({super.key});
+class AllOrdersScreen extends StatefulWidget {
+  static const String routeName = '/all-orders';
+  const AllOrdersScreen({super.key});
 
   @override
-  State<Orders> createState() => _OrdersState();
+  State<AllOrdersScreen> createState() => _AllOrdersScreenState();
 }
 
-class _OrdersState extends State<Orders> {
+class _AllOrdersScreenState extends State<AllOrdersScreen> {
   List<Order>? orders;
   final AccountServices accountServices = AccountServices();
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -24,54 +26,53 @@ class _OrdersState extends State<Orders> {
   }
 
   void fetchOrders() async {
+    setState(() {
+      isLoading = true;
+    });
     orders = await accountServices.fetchMyOrders(context: context);
-    // Sắp xếp orders theo thời gian đặt hàng mới nhất
-    if (orders != null && orders!.isNotEmpty) {
-      orders!.sort((a, b) => b.orderedAt.compareTo(a.orderedAt));
-    }
-    setState(() {});
+    setState(() {
+      isLoading = false;
+    });
   }
 
-  // Trạng thái rỗng khi không có đơn hàng
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.shopping_bag_outlined,
-              size: 40,
-              color: Colors.grey[400],
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'No orders yet',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[600],
-            ),
-          ),
-          const SizedBox(height: 6),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Text(
-              'Start shopping to see your orders here',
-              style: TextStyle(fontSize: 13, color: Colors.grey[500]),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-            ),
-          ),
-        ],
-      ),
-    );
+  void navigateToSearchScreen(String query) {
+    Navigator.pushNamed(context, SearchScreen.routeName, arguments: query);
+  }
+
+  // Màu sắc theo trạng thái
+  Color _getStatusColor(int status) {
+    switch (status) {
+      case 0:
+        return Colors.orange; // Đang chờ
+      case 1:
+        return Colors.blue; // Đã xác nhận
+      case 2:
+        return Colors.purple; // Đang giao
+      case 3:
+        return Colors.green; // Đã giao
+      case 4:
+        return Colors.red; // Đã hủy
+      default:
+        return Colors.grey;
+    }
+  }
+
+  // Text trạng thái
+  String _getStatusText(int status) {
+    switch (status) {
+      case 0:
+        return 'Pending';
+      case 1:
+        return 'Confirmed';
+      case 2:
+        return 'Shipped';
+      case 3:
+        return 'Delivered';
+      case 4:
+        return 'Cancelled';
+      default:
+        return 'Unknown';
+    }
   }
 
   // Card đơn hàng với thiết kế đẹp
@@ -221,7 +222,7 @@ class _OrdersState extends State<Orders> {
 
                       const SizedBox(height: 8),
 
-                      // Tên sản phẩm
+                      // Tên sản phẩm (nếu có)
                       Text(
                         order.products[0].name,
                         style: TextStyle(
@@ -229,7 +230,7 @@ class _OrdersState extends State<Orders> {
                           fontWeight: FontWeight.w500,
                           color: Colors.grey[800],
                         ),
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
 
@@ -274,49 +275,145 @@ class _OrdersState extends State<Orders> {
     );
   }
 
-  // Màu sắc theo trạng thái
-  Color _getStatusColor(int status) {
-    switch (status) {
-      case 0:
-        return Colors.orange; // Đang chờ
-      case 1:
-        return Colors.blue; // Đã xác nhận
-      case 2:
-        return Colors.purple; // Đang giao
-      case 3:
-        return Colors.green; // Đã giao
-      case 4:
-        return Colors.red; // Đã hủy
-      default:
-        return Colors.grey;
-    }
-  }
-
-  // Text trạng thái
-  String _getStatusText(int status) {
-    switch (status) {
-      case 0:
-        return 'Pending';
-      case 1:
-        return 'Confirmed';
-      case 2:
-        return 'Shipped';
-      case 3:
-        return 'Delivered';
-      case 4:
-        return 'Cancelled';
-      default:
-        return 'Unknown';
-    }
+  // Trạng thái rỗng khi không có đơn hàng
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.shopping_bag_outlined,
+              size: 60,
+              color: Colors.grey[400],
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'No orders yet',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[700],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
+            child: Text(
+              'Start shopping to see your orders here',
+              style: TextStyle(fontSize: 16, color: Colors.grey[500]),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+            ),
+          ),
+          const SizedBox(height: 30),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            },
+            icon: const Icon(Icons.shopping_cart, color: Colors.white),
+            label: const Text(
+              'Start Shopping',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: GlobalVariables.selectedNavBarColor,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25),
+              ),
+              elevation: 3,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return orders == null
-        ? const Loader()
-        : SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: Container(
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(60),
+        child: AppBar(
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: GlobalVariables.appBarGradient,
+            ),
+          ),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Container(
+                  height: 42,
+                  margin: const EdgeInsets.only(left: 15),
+                  child: Material(
+                    borderRadius: BorderRadius.circular(7),
+                    elevation: 1,
+                    child: TextFormField(
+                      onFieldSubmitted: navigateToSearchScreen,
+                      decoration: InputDecoration(
+                        prefixIcon: InkWell(
+                          onTap: () {},
+                          child: const Padding(
+                            padding: EdgeInsets.only(left: 6),
+                            child: Icon(
+                              Icons.search,
+                              color: Colors.black,
+                              size: 23,
+                            ),
+                          ),
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding: const EdgeInsets.only(top: 10),
+                        border: const OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(7)),
+                          borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: const OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(7)),
+                          borderSide: BorderSide(
+                            color: Colors.black38,
+                            width: 1,
+                          ),
+                        ),
+                        hintText: 'Search Amazon.in',
+                        hintStyle: const TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 17,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                color: Colors.transparent,
+                height: 42,
+                margin: const EdgeInsets.symmetric(horizontal: 10),
+                child: const Icon(Icons.mic, color: Colors.black, size: 25),
+              ),
+            ],
+          ),
+        ),
+      ),
+      body: isLoading
+          ? const Loader()
+          : orders == null || orders!.isEmpty
+          ? _buildEmptyState()
+          : Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
@@ -327,107 +424,83 @@ class _OrdersState extends State<Orders> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header với nút See all
+                  // Header với thiết kế đẹp hơn
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                    padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Your Orders',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF2C3E50),
-                                letterSpacing: 0.3,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              orders!.length == 1
-                                  ? '1 order'
-                                  : 'Latest of ${orders!.length} orders',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: Colors.grey[600],
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                          ],
-                        ),
-                        if (orders!.length > 1)
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.pushNamed(
-                                context,
-                                AllOrdersScreen.routeName,
-                              );
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    GlobalVariables.selectedNavBarColor
-                                        .withOpacity(0.8),
-                                    GlobalVariables.selectedNavBarColor,
-                                  ],
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'All Your Orders',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF2C3E50),
+                                  letterSpacing: 0.3,
                                 ),
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: GlobalVariables.selectedNavBarColor
-                                        .withOpacity(0.3),
-                                    blurRadius: 6,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
                               ),
-                              child: const Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    'See all',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  SizedBox(width: 4),
-                                  Icon(
-                                    Icons.arrow_forward_ios,
-                                    size: 10,
-                                    color: Colors.white,
-                                  ),
-                                ],
+                              const SizedBox(height: 4),
+                              Text(
+                                '${orders!.length} orders found',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[600],
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: GlobalVariables.selectedNavBarColor
+                                .withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(15),
+                            border: Border.all(
+                              color: GlobalVariables.selectedNavBarColor
+                                  .withOpacity(0.3),
                             ),
                           ),
+                          child: Text(
+                            '${orders!.length}',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: GlobalVariables.selectedNavBarColor,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
 
-                  // Hiển thị đơn hàng mới nhất hoặc empty state
-                  orders!.isEmpty
-                      ? SizedBox(height: 200, child: _buildEmptyState())
-                      : Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: _buildOrderCard(orders!.first),
-                        ),
-
-                  // Thêm khoảng trắng
-                  const SizedBox(height: 20),
+                  // Danh sách đơn hàng
+                  Expanded(
+                    child: RefreshIndicator(
+                      onRefresh: () async {
+                        fetchOrders();
+                      },
+                      child: ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        itemCount: orders!.length,
+                        itemBuilder: (context, index) {
+                          return _buildOrderCard(orders![index]);
+                        },
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
-          );
+    );
   }
 }

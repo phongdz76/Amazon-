@@ -31,6 +31,11 @@ products: [
     type: Number,
     default: 0,
   },
+  paymentMethod: {
+    type: String,
+    enum: ['Online', 'COD'],
+    default: 'Online',
+  },
 });
 
 const Order = mongoose.model('Order', orderSchema);

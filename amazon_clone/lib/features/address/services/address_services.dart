@@ -23,9 +23,7 @@ class AddressServices {
           'Content-Type': 'application/json; charset=UTF-8',
           'x-auth-token': userProvider.user.token,
         },
-        body: jsonEncode({
-          'address': address,
-        }),
+        body: jsonEncode({'address': address}),
       );
 
       httpErrorHand(
@@ -57,9 +55,7 @@ class AddressServices {
           'Content-Type': 'application/json; charset=UTF-8',
           'x-auth-token': userProvider.user.token,
         },
-        body: jsonEncode({
-          'phone': phone,
-        }),
+        body: jsonEncode({'phone': phone}),
       );
 
       httpErrorHand(
@@ -87,25 +83,62 @@ class AddressServices {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     try {
-      http.Response res = await http.post(Uri.parse('$uri/api/order'),
-          headers: {
-            'Content-Type': 'application/json; charset=UTF-8',
-            'x-auth-token': userProvider.user.token,
-          },
-          body: jsonEncode({
-            'cart': userProvider.user.cart,
-            'address': address,
-            'totalPrice': totalSum,
-          }));
+      http.Response res = await http.post(
+        Uri.parse('$uri/api/order'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'x-auth-token': userProvider.user.token,
+        },
+        body: jsonEncode({
+          'cart': userProvider.user.cart,
+          'address': address,
+          'totalPrice': totalSum,
+        }),
+      );
 
       httpErrorHand(
         response: res,
         context: context,
         onSuccess: () {
           showSnackBar(context, 'Your order has been placed!');
-          User user = userProvider.user.copyWith(
-            cart: [],
-          );
+          User user = userProvider.user.copyWith(cart: []);
+          userProvider.setUserFromModel(user);
+        },
+      );
+    } catch (e) {
+      showSnackBar(context, e.toString());
+    }
+  }
+
+  // Place order with Cash on Delivery
+  void placeOrderCOD({
+    required BuildContext context,
+    required String address,
+    required double totalSum,
+  }) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    try {
+      http.Response res = await http.post(
+        Uri.parse('$uri/api/order'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'x-auth-token': userProvider.user.token,
+        },
+        body: jsonEncode({
+          'cart': userProvider.user.cart,
+          'address': address,
+          'totalPrice': totalSum,
+          'paymentMethod': 'COD', // Cash on Delivery
+        }),
+      );
+
+      httpErrorHand(
+        response: res,
+        context: context,
+        onSuccess: () {
+          showSnackBar(context, 'Your COD order has been placed successfully!');
+          User user = userProvider.user.copyWith(cart: []);
           userProvider.setUserFromModel(user);
         },
       );
@@ -128,9 +161,7 @@ class AddressServices {
           'Content-Type': 'application/json; charset=UTF-8',
           'x-auth-token': userProvider.user.token,
         },
-        body: jsonEncode({
-          'id': product.id,
-        }),
+        body: jsonEncode({'id': product.id}),
       );
 
       httpErrorHand(

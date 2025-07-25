@@ -1,4 +1,5 @@
 import 'package:amazon_clone/common/widgets/bottom_bar.dart';
+import 'package:amazon_clone/features/account/screens/all_orders_screen.dart';
 import 'package:amazon_clone/features/account/screens/profile_screen.dart';
 import 'package:amazon_clone/features/account/screens/wishlist_screen.dart';
 import 'package:amazon_clone/features/address/screens/address_screen.dart';
@@ -120,6 +121,12 @@ Route<dynamic> generateRoute(RouteSettings routeSetting) {
       return MaterialPageRoute(
         settings: routeSetting,
         builder: (_) => const WishlistScreen(),
+      );
+
+    case AllOrdersScreen.routeName:
+      return MaterialPageRoute(
+        settings: routeSetting,
+        builder: (_) => const AllOrdersScreen(),
       );
     case LiveStreamHomePage.routeName:
       return MaterialPageRoute(
