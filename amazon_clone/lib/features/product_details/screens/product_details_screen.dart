@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:amazon_clone/common/widgets/stars.dart';
 import 'package:amazon_clone/constants/global_variables.dart';
 import 'package:amazon_clone/features/account/services/wishlist_services.dart';
@@ -5,11 +6,13 @@ import 'package:amazon_clone/features/address/screens/address_screen.dart'; // T
 import 'package:amazon_clone/features/product_details/services/product_details_service.dart';
 import 'package:amazon_clone/features/search/screens/search_screen.dart';
 import 'package:amazon_clone/models/product.dart';
+import 'package:amazon_clone/models/user.dart';
 import 'package:amazon_clone/providers/user_provider.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 
 class ProductDetailsScreen extends StatefulWidget {
   static const String routeName = '/product-details';
@@ -41,19 +44,81 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   }
 
   // Thêm hàm này để xử lý Buy Now
-  void buyNow() {
-    // Thêm sản phẩm vào cart trước
-    productDetailsService.addToCart(context: context, product: widget.product);
+  void buyNow() async {
+    try {
+      // Hiển thị loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return const AlertDialog(
+            content: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(width: 16),
+                Text('Processing...'),
+              ],
+            ),
+          );
+        },
+      );
 
-    // Tính tổng giá của cart hiện tại
-    final user = Provider.of<UserProvider>(context, listen: false).user;
-    double sum = 0;
-    user.cart
-        .map((e) => sum += e['quantity'] * e['product']['price'].toDouble())
-        .toList();
+      // Thêm sản phẩm vào cart
+      await _addToCartAsync();
 
-    // Navigate đến address screen với tổng giá
-    navigateToAddress(sum.toInt());
+      // Đóng loading dialog
+      if (mounted) Navigator.of(context).pop();
+
+      // Tính tổng giá của cart sau khi thêm sản phẩm
+      final user = Provider.of<UserProvider>(context, listen: false).user;
+      double sum = 0;
+      for (var item in user.cart) {
+        if (item['quantity'] != null &&
+            item['product'] != null &&
+            item['product']['price'] != null) {
+          int quantity = item['quantity'] as int;
+          double price = (item['product']['price'] as num).toDouble();
+          sum += quantity * price;
+        }
+      }
+
+      // Navigate đến address screen với tổng giá
+      if (mounted) {
+        navigateToAddress(sum.toInt());
+      }
+    } catch (e) {
+      // Đóng loading dialog nếu có lỗi
+      if (mounted) Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  // Hàm async để thêm sản phẩm vào cart
+  Future<void> _addToCartAsync() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    final response = await http.post(
+      Uri.parse('$uri/api/add-to-cart'),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'x-auth-token': userProvider.user.token,
+      },
+      body: jsonEncode({'id': widget.product.id!}),
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(response.body);
+      User updatedUser = userProvider.user.copyWith(cart: responseData['cart']);
+      userProvider.setUserFromModel(updatedUser);
+    } else {
+      throw Exception('Failed to add product to cart');
+    }
   }
 
   @override

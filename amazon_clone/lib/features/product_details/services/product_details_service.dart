@@ -11,7 +11,7 @@ import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 
 class ProductDetailsService {
-   void addToCart({
+  void addToCart({
     required BuildContext context,
     required Product product,
   }) async {
@@ -24,8 +24,59 @@ class ProductDetailsService {
           'Content-Type': 'application/json; charset=UTF-8',
           'x-auth-token': userProvider.user.token,
         },
+        body: jsonEncode({'id': product.id!}),
+      );
+
+      httpErrorHand(
+        response: res,
+        context: context,
+        onSuccess: () {
+          User user = userProvider.user.copyWith(
+            cart: jsonDecode(res.body)['cart'],
+          );
+          userProvider.setUserFromModel(user);
+        },
+      );
+    } catch (e) {
+      showSnackBar(context, e.toString());
+    }
+  }
+
+  // Thêm phương thức để đặt hàng trực tiếp một sản phẩm (Buy Now)
+  void buyNowProduct({
+    required BuildContext context,
+    required Product product,
+    required String address,
+  }) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    try {
+      // Tạo cart tạm thời chỉ chứa sản phẩm hiện tại
+      List<Map<String, dynamic>> tempCart = [
+        {
+          'product': {
+            '_id': product.id,
+            'name': product.name,
+            'price': product.price,
+            'images': product.images,
+            'description': product.description,
+            'category': product.category,
+          },
+          'quantity': 1,
+        },
+      ];
+
+      http.Response res = await http.post(
+        Uri.parse('$uri/api/order'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'x-auth-token': userProvider.user.token,
+        },
         body: jsonEncode({
-          'id': product.id!,
+          'cart': tempCart,
+          'address': address,
+          'totalPrice': product.price.toDouble(),
+          'isBuyNow': true, // Flag để server biết đây là buy now
         }),
       );
 
@@ -33,11 +84,8 @@ class ProductDetailsService {
         response: res,
         context: context,
         onSuccess: () {
-          User user =
-              userProvider.user.copyWith(
-                cart: jsonDecode(res.body)['cart']
-              );
-          userProvider.setUserFromModel(user);
+          showSnackBar(context, 'Your order has been placed successfully!');
+          // Không cần xóa cart vì chúng ta không thay đổi cart gốc
         },
       );
     } catch (e) {
@@ -59,17 +107,10 @@ class ProductDetailsService {
           'Content-Type': 'application/json; charset=UTF-8',
           'x-auth-token': userProvider.user.token,
         },
-        body: jsonEncode({
-          'id': product.id!,
-          'rating': rating,
-        }),
+        body: jsonEncode({'id': product.id!, 'rating': rating}),
       );
 
-      httpErrorHand(
-        response: res,
-        context: context,
-        onSuccess: () {},
-      );
+      httpErrorHand(response: res, context: context, onSuccess: () {});
     } catch (e) {
       showSnackBar(context, e.toString());
     }

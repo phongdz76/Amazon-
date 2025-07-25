@@ -68,14 +68,18 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
+        width: double.infinity,
+        height: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            stops: const [0.0, 0.4, 0.7, 1.0],
             colors: [
-              GlobalVariables.selectedNavBarColor.withOpacity(0.8),
-              GlobalVariables.secondaryColor.withOpacity(0.6),
-              Colors.orange.withOpacity(0.4),
+              const Color(0xFF232F3E), // Amazon dark blue
+              GlobalVariables.selectedNavBarColor,
+              const Color(0xFF00A8CC), // Teal blue
+              const Color(0xFFFF9500), // Amazon orange
             ],
           ),
         ),
@@ -92,13 +96,18 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
-                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.white.withOpacity(0.95),
+                        borderRadius: BorderRadius.circular(25),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 20,
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 25,
                             offset: const Offset(0, 10),
+                          ),
+                          BoxShadow(
+                            color: Colors.white.withOpacity(0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, -5),
                           ),
                         ],
                       ),
@@ -136,13 +145,18 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                     // Auth Toggle Buttons
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
-                        borderRadius: BorderRadius.circular(15),
+                        color: Colors.white.withOpacity(0.95),
+                        borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 15,
-                            offset: const Offset(0, 5),
+                            color: Colors.black.withOpacity(0.15),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                          ),
+                          BoxShadow(
+                            color: Colors.white.withOpacity(0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, -3),
                           ),
                         ],
                       ),
@@ -158,10 +172,25 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                               child: Container(
                                 padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
+                                  gradient: _auth == Auth.signUp
+                                      ? LinearGradient(
+                                          colors: [
+                                            GlobalVariables.selectedNavBarColor,
+                                            GlobalVariables.selectedNavBarColor.withOpacity(0.8),
+                                          ],
+                                        )
+                                      : null,
                                   color: _auth == Auth.signUp
-                                      ? GlobalVariables.selectedNavBarColor
+                                      ? null
                                       : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(15),
+                                  borderRadius: BorderRadius.circular(18),
+                                  boxShadow: _auth == Auth.signUp ? [
+                                    BoxShadow(
+                                      color: GlobalVariables.selectedNavBarColor.withOpacity(0.3),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ] : null,
                                 ),
                                 child: Text(
                                   'Sign Up',
@@ -187,10 +216,25 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                               child: Container(
                                 padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
+                                  gradient: _auth == Auth.signIn
+                                      ? LinearGradient(
+                                          colors: [
+                                            GlobalVariables.selectedNavBarColor,
+                                            GlobalVariables.selectedNavBarColor.withOpacity(0.8),
+                                          ],
+                                        )
+                                      : null,
                                   color: _auth == Auth.signIn
-                                      ? GlobalVariables.selectedNavBarColor
+                                      ? null
                                       : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(15),
+                                  borderRadius: BorderRadius.circular(18),
+                                  boxShadow: _auth == Auth.signIn ? [
+                                    BoxShadow(
+                                      color: GlobalVariables.selectedNavBarColor.withOpacity(0.3),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ] : null,
                                 ),
                                 child: Text(
                                   'Sign In',
@@ -231,15 +275,20 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
   Widget _buildSignUpForm() {
     return Container(
       key: const ValueKey('signUp'),
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.95),
-        borderRadius: BorderRadius.circular(20),
+        color: Colors.white.withOpacity(0.98),
+        borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 25,
+            offset: const Offset(0, 15),
+          ),
+          BoxShadow(
+            color: Colors.white.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
           ),
         ],
       ),
@@ -282,11 +331,13 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: GlobalVariables.selectedNavBarColor,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 18),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(15),
                   ),
-                  elevation: 5,
+                  elevation: 8,
+                  shadowColor: GlobalVariables.selectedNavBarColor.withOpacity(0.4),
                 ),
                 child: const Text(
                   'Create Account',
@@ -307,15 +358,20 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
   Widget _buildSignInForm() {
     return Container(
       key: const ValueKey('signIn'),
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.95),
-        borderRadius: BorderRadius.circular(20),
+        color: Colors.white.withOpacity(0.98),
+        borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 25,
+            offset: const Offset(0, 15),
+          ),
+          BoxShadow(
+            color: Colors.white.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
           ),
         ],
       ),
@@ -352,11 +408,13 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: GlobalVariables.selectedNavBarColor,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 18),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(15),
                   ),
-                  elevation: 5,
+                  elevation: 8,
+                  shadowColor: GlobalVariables.selectedNavBarColor.withOpacity(0.4),
                 ),
                 child: const Text(
                   'Sign In',
