@@ -113,40 +113,40 @@ authRouter.post("/api/forgot-password", async (req, res) => {
 });
 
 
-// // POST /api/reset-password  
-// authRouter.post("/api/reset-password", async (req, res) => {
-//     try {
-//         const { token, newPassword } = req.body;
+// POST /api/reset-password  
+authRouter.post("/api/reset-password", async (req, res) => {
+    try {
+        const { token, newPassword } = req.body;
 
-//         // Verify token
-//         const decoded = jwt.verify(token, "passwordKey");
-//         if (decoded.purpose !== 'password-reset') {
-//             return res.status(400).json({ msg: "Invalid reset token" });
-//         }
+        // Verify token
+        const decoded = jwt.verify(token, "passwordKey");
+        if (decoded.purpose !== 'password-reset') {
+            return res.status(400).json({ msg: "Invalid reset token" });
+        }
 
-//         // Tìm user
-//         const user = await User.findById(decoded.id);
-//         if (!user) {
-//             return res.status(400).json({ msg: "User not found" });
-//         }
+        // Tìm user
+        const user = await User.findById(decoded.id);
+        if (!user) {
+            return res.status(400).json({ msg: "User not found" });
+        }
 
-//         // Hash password mới
-//         const hashedPassword = await bcrypt.hash(newPassword, 8);
+        // Hash password mới
+        const hashedPassword = await bcrypt.hash(newPassword, 8);
         
-//         // Cập nhật password
-//         user.password = hashedPassword;
-//         await user.save();
+        // Cập nhật password
+        user.password = hashedPassword;
+        await user.save();
 
-//         res.json({ msg: "Password reset successful" });
-//     } catch (e) {
-//         if (e.name === 'TokenExpiredError') {
-//             return res.status(400).json({ msg: "Reset token has expired" });
-//         }
-//         if (e.name === 'JsonWebTokenError') {
-//             return res.status(400).json({ msg: "Invalid reset token" });
-//         }
-//         res.status(500).json({ error: e.message });
-//     }
-// });
+        res.json({ msg: "Password reset successful" });
+    } catch (e) {
+        if (e.name === 'TokenExpiredError') {
+            return res.status(400).json({ msg: "Reset token has expired" });
+        }
+        if (e.name === 'JsonWebTokenError') {
+            return res.status(400).json({ msg: "Invalid reset token" });
+        }
+        res.status(500).json({ error: e.message });
+    }
+});
 
 module.exports = authRouter;

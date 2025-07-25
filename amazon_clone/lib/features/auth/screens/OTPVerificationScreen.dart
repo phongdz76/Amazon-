@@ -1,52 +1,98 @@
 import 'package:amazon_clone/constants/global_variables.dart';
 import 'package:amazon_clone/features/auth/services/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'dart:async';
 
-class ForgotPasswordScreen extends StatefulWidget {
-  static const String routeName = '/forgot-password';
-  const ForgotPasswordScreen({super.key});
+class OTPVerificationScreen extends StatefulWidget {
+  static const String routeName = '/otp-verification';
+  final String email;
+
+  const OTPVerificationScreen({super.key, required this.email});
 
   @override
-  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+  State<OTPVerificationScreen> createState() => _OTPVerificationScreenState();
 }
 
-class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _emailController = TextEditingController();
+class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
+  final TextEditingController _otpController = TextEditingController();
   final AuthService authService = AuthService();
   bool _isLoading = false;
+  bool _isResending = false;
+  int _resendTimer = 0;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _startResendTimer();
+  }
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _otpController.dispose();
+    _timer?.cancel();
     super.dispose();
   }
 
-  void _resetPassword() async {
-    if (!_formKey.currentState!.validate()) {
+  void _startResendTimer() {
+    _resendTimer = 60;
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (_resendTimer > 0) {
+        setState(() {
+          _resendTimer--;
+        });
+      } else {
+        timer.cancel();
+      }
+    });
+  }
+
+  void _verifyOTP() async {
+    if (_otpController.text.length != 6) {
+      _showSnackBar('Vui lòng nhập đầy đủ 6 chữ số', isError: true);
       return;
     }
 
     setState(() => _isLoading = true);
 
     try {
-      bool success = await authService.sendResetOTP(
+      bool isVerified = await authService.verifyResetOTP(
         context: context,
-        email: _emailController.text.trim(),
+        email: widget.email,
+        otp: _otpController.text,
       );
 
-      if (success) {
-        // Chuyển sang màn hình OTP
+      if (isVerified) {
         Navigator.pushNamed(
           context,
-          '/otp-verification',
-          arguments: _emailController.text.trim(),
+          '/reset-password',
+          arguments: {'email': widget.email, 'otp': _otpController.text},
         );
       }
     } catch (e) {
       _showSnackBar('Có lỗi xảy ra: ${e.toString()}', isError: true);
     } finally {
       setState(() => _isLoading = false);
+    }
+  }
+
+  void _resendOTP() async {
+    setState(() => _isResending = true);
+
+    try {
+      bool success = await authService.resendOTP(
+        context: context,
+        email: widget.email,
+      );
+
+      if (success) {
+        _startResendTimer();
+        _otpController.clear();
+      }
+    } catch (e) {
+      _showSnackBar('Không thể gửi lại mã: ${e.toString()}', isError: true);
+    } finally {
+      setState(() => _isResending = false);
     }
   }
 
@@ -116,7 +162,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
         const SizedBox(width: 20),
         const Text(
-          'Reset Password',
+          'Verify OTP',
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -154,7 +200,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 borderRadius: BorderRadius.circular(40),
               ),
               child: Icon(
-                Icons.lock_reset,
+                Icons.mark_email_read,
                 size: 40,
                 color: GlobalVariables.selectedNavBarColor,
               ),
@@ -163,7 +209,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             const SizedBox(height: 20),
 
             const Text(
-              'Forgot Your Password?',
+              'Enter Verification Code',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -175,7 +221,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             const SizedBox(height: 10),
 
             Text(
-              'Enter your email address and we\'ll send you a verification code to reset your password.',
+              'We\'ve sent a 6-digit verification code to',
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey[600],
@@ -184,64 +230,58 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               textAlign: TextAlign.center,
             ),
 
+            const SizedBox(height: 5),
+
+            Text(
+              widget.email,
+              style: TextStyle(
+                fontSize: 16,
+                color: GlobalVariables.selectedNavBarColor,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+
             const SizedBox(height: 30),
 
-            // Email form
-            Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  _buildEmailField(),
-                  const SizedBox(height: 30),
-                  _buildResetButton(),
-                ],
-              ),
-            ),
+            // OTP Input Field
+            _buildOTPField(),
+
+            const SizedBox(height: 30),
+
+            // Verify Button
+            _buildVerifyButton(),
 
             const SizedBox(height: 20),
 
-            // Back to sign in
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.arrow_back,
-                    size: 16,
-                    color: GlobalVariables.selectedNavBarColor,
-                  ),
-                  const SizedBox(width: 5),
-                  Text(
-                    'Back to Sign In',
-                    style: TextStyle(
-                      color: GlobalVariables.selectedNavBarColor,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            // Resend OTP
+            _buildResendSection(),
 
             const SizedBox(height: 10),
 
-            // Info container
+            // Debug info (remove in production)
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.blue.withOpacity(0.2)),
+                color: Colors.orange.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange.withOpacity(0.3)),
               ),
-              child: Row(
+              child: Column(
                 children: [
-                  Icon(Icons.info_outline, color: Colors.blue[600], size: 20),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'We\'ll send a 6-digit verification code to your email address',
-                      style: TextStyle(color: Colors.blue[700], fontSize: 14),
+                  Text(
+                    'Demo Mode',
+                    style: TextStyle(
+                      color: Colors.orange[700],
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
                     ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Check your email for the 6-digit OTP code',
+                    style: TextStyle(color: Colors.orange[600], fontSize: 11),
+                    textAlign: TextAlign.center,
                   ),
                 ],
               ),
@@ -252,40 +292,43 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     );
   }
 
-  Widget _buildEmailField() {
+  Widget _buildOTPField() {
     return Container(
       decoration: BoxDecoration(
         color: Colors.grey[50],
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey[200]!),
       ),
-      child: TextFormField(
-        controller: _emailController,
-        keyboardType: TextInputType.emailAddress,
+      child: TextField(
+        controller: _otpController,
+        keyboardType: TextInputType.number,
+        textAlign: TextAlign.center,
+        maxLength: 6,
+        style: const TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 8,
+        ),
         decoration: InputDecoration(
-          hintText: 'Enter your email address',
-          prefixIcon: Icon(Icons.email_outlined, color: Colors.grey[400]),
+          hintText: '000000',
+          hintStyle: TextStyle(color: Colors.grey[400], letterSpacing: 8),
           border: InputBorder.none,
+          counterText: '',
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
-            vertical: 16,
+            vertical: 20,
           ),
-          hintStyle: TextStyle(color: Colors.grey[500]),
         ),
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Please enter your email address';
+        onChanged: (value) {
+          if (value.length == 6) {
+            FocusScope.of(context).unfocus();
           }
-          if (!value.contains('@') || !value.contains('.')) {
-            return 'Please enter a valid email address';
-          }
-          return null;
         },
       ),
     );
   }
 
-  Widget _buildResetButton() {
+  Widget _buildVerifyButton() {
     return Container(
       width: double.infinity,
       height: 56,
@@ -309,7 +352,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
-          onTap: _isLoading ? null : _resetPassword,
+          onTap: _isLoading ? null : _verifyOTP,
           child: Center(
             child: _isLoading
                 ? const SizedBox(
@@ -321,7 +364,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     ),
                   )
                 : const Text(
-                    'Send Verification Code',
+                    'Verify OTP',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -331,6 +374,41 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildResendSection() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          "Didn't receive the code? ",
+          style: TextStyle(color: Colors.grey[600], fontSize: 14),
+        ),
+        if (_resendTimer > 0)
+          Text(
+            'Resend in ${_resendTimer}s',
+            style: TextStyle(color: Colors.grey[500], fontSize: 14),
+          )
+        else
+          TextButton(
+            onPressed: _isResending ? null : _resendOTP,
+            child: _isResending
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Text(
+                    'Resend OTP',
+                    style: TextStyle(
+                      color: GlobalVariables.selectedNavBarColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+          ),
+      ],
     );
   }
 }

@@ -2,6 +2,8 @@ import 'package:amazon_clone/common/widgets/bottom_bar.dart';
 import 'package:amazon_clone/features/address/screens/address_screen.dart';
 import 'package:amazon_clone/features/admin/screens/add_product_screen.dart';
 import 'package:amazon_clone/features/admin/screens/admin_screen.dart';
+import 'package:amazon_clone/features/auth/screens/OTPVerificationScreen.dart';
+import 'package:amazon_clone/features/auth/screens/ResetPasswordScreen.dart';
 import 'package:amazon_clone/features/auth/screens/auth_screen.dart';
 import 'package:amazon_clone/features/auth/screens/forgot_password_screen.dart';
 import 'package:amazon_clone/features/home/screens/category_deals_screen.dart';
@@ -92,7 +94,18 @@ Route<dynamic> generateRoute(RouteSettings routeSetting) {
         settings: routeSetting,
         builder: (_) => OrderDetailScreen(order: order),
       );
+    case '/otp-verification':
+      var email = routeSetting.arguments as String;
+      return MaterialPageRoute(
+        builder: (_) => OTPVerificationScreen(email: email),
+      );
 
+    case '/reset-password':
+      var args = routeSetting.arguments as Map<String, String>;
+      return MaterialPageRoute(
+        builder: (_) =>
+            ResetPasswordScreen(email: args['email']!, otp: args['otp']!),
+      );
     default:
       return MaterialPageRoute(
         settings: routeSetting,
