@@ -1,6 +1,8 @@
 import 'package:amazon_clone/constants/global_variables.dart';
+import 'package:amazon_clone/constants/theme.dart';
 import 'package:amazon_clone/features/auth/services/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   static const String routeName = '/reset-password';
@@ -136,37 +138,45 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              GlobalVariables.selectedNavBarColor,
-              GlobalVariables.selectedNavBarColor.withOpacity(0.8),
-              Colors.white,
-            ],
-            stops: const [0.0, 0.3, 1.0],
-          ),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                children: [
-                  const SizedBox(height: 40),
-                  _buildHeader(),
-                  const SizedBox(height: 60),
-                  _buildContentCard(),
-                  const SizedBox(height: 20),
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return Scaffold(
+          body: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  themeProvider.isDarkMode
+                      ? const Color(0xFF1A1A1A)
+                      : GlobalVariables.selectedNavBarColor,
+                  themeProvider.isDarkMode
+                      ? const Color(0xFF2D2D2D)
+                      : GlobalVariables.selectedNavBarColor.withOpacity(0.8),
+                  Theme.of(context).scaffoldBackgroundColor,
                 ],
+                stops: const [0.0, 0.3, 1.0],
+              ),
+            ),
+            child: SafeArea(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 40),
+                      _buildHeader(),
+                      const SizedBox(height: 60),
+                      _buildContentCard(),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

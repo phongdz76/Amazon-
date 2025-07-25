@@ -1,4 +1,4 @@
-import 'package:amazon_clone/constants/global_variables.dart';
+import 'package:amazon_clone/constants/theme.dart';
 import 'package:amazon_clone/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -9,8 +9,12 @@ class BelowAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<UserProvider>(context).user;
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Container(
-      decoration: const BoxDecoration(gradient: GlobalVariables.appBarGradient),
+      decoration: BoxDecoration(
+        gradient: themeProvider.getAppBarGradient(context),
+      ),
       padding: const EdgeInsets.only(left: 15, right: 15, top: 10, bottom: 10),
       child: Row(
         children: [
@@ -36,13 +40,20 @@ class BelowAppBar extends StatelessWidget {
             child: RichText(
               text: TextSpan(
                 text: 'Hello, ',
-                style: const TextStyle(fontSize: 22, color: Colors.black),
+                style: TextStyle(
+                  fontSize: 22,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black,
+                ),
                 children: [
                   TextSpan(
                     text: user.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 22,
-                      color: Colors.black,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white
+                          : Colors.black,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

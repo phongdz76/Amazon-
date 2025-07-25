@@ -34,6 +34,8 @@ class _OrdersState extends State<Orders> {
 
   // Trạng thái rỗng khi không có đơn hàng
   Widget _buildEmptyState() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -41,13 +43,13 @@ class _OrdersState extends State<Orders> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: isDark ? Colors.grey[800] : Colors.grey[100],
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.shopping_bag_outlined,
               size: 40,
-              color: Colors.grey[400],
+              color: isDark ? Colors.grey[500] : Colors.grey[400],
             ),
           ),
           const SizedBox(height: 12),
@@ -56,7 +58,9 @@ class _OrdersState extends State<Orders> {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[600],
+              color: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.color?.withOpacity(0.8),
             ),
           ),
           const SizedBox(height: 6),
@@ -64,7 +68,12 @@ class _OrdersState extends State<Orders> {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Text(
               'Start shopping to see your orders here',
-              style: TextStyle(fontSize: 13, color: Colors.grey[500]),
+              style: TextStyle(
+                fontSize: 13,
+                color: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.color?.withOpacity(0.6),
+              ),
               textAlign: TextAlign.center,
               maxLines: 2,
             ),
@@ -76,12 +85,15 @@ class _OrdersState extends State<Orders> {
 
   // Card đơn hàng với thiết kế đẹp
   Widget _buildOrderCard(Order order) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       child: Material(
         elevation: 3,
         borderRadius: BorderRadius.circular(12),
-        shadowColor: Colors.black.withOpacity(0.08),
+        shadowColor: Theme.of(context).shadowColor,
+        color: Theme.of(context).cardColor,
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: () {
@@ -98,7 +110,9 @@ class _OrdersState extends State<Orders> {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Colors.white, Colors.grey[50]!],
+                colors: isDark
+                    ? [Colors.grey[800]!, Colors.grey[850]!]
+                    : [Colors.white, Colors.grey[50]!],
               ),
             ),
             child: Row(
@@ -139,7 +153,7 @@ class _OrdersState extends State<Orders> {
                         if (loadingProgress == null) return child;
                         return Container(
                           decoration: BoxDecoration(
-                            color: Colors.grey[200],
+                            color: isDark ? Colors.grey[700] : Colors.grey[200],
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Center(
@@ -153,7 +167,7 @@ class _OrdersState extends State<Orders> {
                                           loadingProgress.expectedTotalBytes!
                                     : null,
                                 strokeWidth: 2,
-                                color: GlobalVariables.selectedNavBarColor,
+                                color: Theme.of(context).colorScheme.primary,
                               ),
                             ),
                           ),
@@ -176,7 +190,9 @@ class _OrdersState extends State<Orders> {
                           Icon(
                             Icons.shopping_cart_outlined,
                             size: 14,
-                            color: Colors.grey[600],
+                            color: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.color?.withOpacity(0.7),
                           ),
                           const SizedBox(width: 4),
                           Text(
@@ -186,7 +202,9 @@ class _OrdersState extends State<Orders> {
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
-                              color: Colors.grey[700],
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium?.color?.withOpacity(0.8),
                             ),
                           ),
                           const Spacer(),
@@ -312,6 +330,8 @@ class _OrdersState extends State<Orders> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return orders == null
         ? const Loader()
         : SingleChildScrollView(
@@ -321,7 +341,9 @@ class _OrdersState extends State<Orders> {
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [Colors.grey[50]!, Colors.white],
+                  colors: isDark
+                      ? [Colors.grey[900]!, Colors.grey[800]!]
+                      : [Colors.grey[50]!, Colors.white],
                 ),
               ),
               child: Column(
@@ -342,7 +364,6 @@ class _OrdersState extends State<Orders> {
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF2C3E50),
                                 letterSpacing: 0.3,
                               ),
                             ),
@@ -353,7 +374,9 @@ class _OrdersState extends State<Orders> {
                                   : 'Latest of ${orders!.length} orders',
                               style: TextStyle(
                                 fontSize: 13,
-                                color: Colors.grey[600],
+                                color: Theme.of(
+                                  context,
+                                ).textTheme.bodySmall?.color?.withOpacity(0.7),
                                 fontWeight: FontWeight.w400,
                               ),
                             ),

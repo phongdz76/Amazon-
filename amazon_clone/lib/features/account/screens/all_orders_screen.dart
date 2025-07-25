@@ -1,10 +1,11 @@
 import 'package:amazon_clone/common/widgets/loader.dart';
-import 'package:amazon_clone/constants/global_variables.dart';
+import 'package:amazon_clone/constants/theme.dart';
 import 'package:amazon_clone/features/account/services/account_services.dart';
 import 'package:amazon_clone/features/order_details/screens/order_details.dart';
 import 'package:amazon_clone/features/search/screens/search_screen.dart';
 import 'package:amazon_clone/models/order.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class AllOrdersScreen extends StatefulWidget {
   static const String routeName = '/all-orders';
@@ -96,11 +97,7 @@ class _AllOrdersScreenState extends State<AllOrdersScreen> {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Colors.white, Colors.grey[50]!],
-              ),
+              color: Theme.of(context).cardColor,
             ),
             child: Row(
               children: [
@@ -126,12 +123,14 @@ class _AllOrdersScreenState extends State<AllOrdersScreen> {
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
                           decoration: BoxDecoration(
-                            color: Colors.grey[200],
+                            color: Theme.of(context).cardColor,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Icon(
                             Icons.image_not_supported,
-                            color: Colors.grey[400],
+                            color: Theme.of(
+                              context,
+                            ).iconTheme.color?.withOpacity(0.4),
                             size: 32,
                           ),
                         );
@@ -140,7 +139,7 @@ class _AllOrdersScreenState extends State<AllOrdersScreen> {
                         if (loadingProgress == null) return child;
                         return Container(
                           decoration: BoxDecoration(
-                            color: Colors.grey[200],
+                            color: Theme.of(context).cardColor,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Center(
@@ -154,7 +153,7 @@ class _AllOrdersScreenState extends State<AllOrdersScreen> {
                                           loadingProgress.expectedTotalBytes!
                                     : null,
                                 strokeWidth: 2,
-                                color: GlobalVariables.selectedNavBarColor,
+                                color: Theme.of(context).primaryColor,
                               ),
                             ),
                           ),
@@ -177,7 +176,9 @@ class _AllOrdersScreenState extends State<AllOrdersScreen> {
                           Icon(
                             Icons.shopping_cart_outlined,
                             size: 14,
-                            color: Colors.grey[600],
+                            color: Theme.of(
+                              context,
+                            ).iconTheme.color?.withOpacity(0.6),
                           ),
                           const SizedBox(width: 4),
                           Text(
@@ -187,7 +188,9 @@ class _AllOrdersScreenState extends State<AllOrdersScreen> {
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
-                              color: Colors.grey[700],
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium?.color?.withOpacity(0.7),
                             ),
                           ),
                           const Spacer(),
@@ -228,7 +231,7 @@ class _AllOrdersScreenState extends State<AllOrdersScreen> {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
-                          color: Colors.grey[800],
+                          color: Theme.of(context).textTheme.bodyMedium?.color,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -244,7 +247,7 @@ class _AllOrdersScreenState extends State<AllOrdersScreen> {
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: GlobalVariables.selectedNavBarColor,
+                              color: Theme.of(context).primaryColor,
                             ),
                           ),
                           const Spacer(),
@@ -252,7 +255,7 @@ class _AllOrdersScreenState extends State<AllOrdersScreen> {
                             'View Details',
                             style: TextStyle(
                               fontSize: 12,
-                              color: GlobalVariables.selectedNavBarColor,
+                              color: Theme.of(context).primaryColor,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -260,7 +263,7 @@ class _AllOrdersScreenState extends State<AllOrdersScreen> {
                           Icon(
                             Icons.arrow_forward_ios,
                             size: 12,
-                            color: GlobalVariables.selectedNavBarColor,
+                            color: Theme.of(context).primaryColor,
                           ),
                         ],
                       ),
@@ -284,13 +287,13 @@ class _AllOrdersScreenState extends State<AllOrdersScreen> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: Theme.of(context).cardColor,
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.shopping_bag_outlined,
               size: 60,
-              color: Colors.grey[400],
+              color: Theme.of(context).iconTheme.color?.withOpacity(0.4),
             ),
           ),
           const SizedBox(height: 20),
@@ -299,7 +302,7 @@ class _AllOrdersScreenState extends State<AllOrdersScreen> {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[700],
+              color: Theme.of(context).textTheme.headlineMedium?.color,
             ),
           ),
           const SizedBox(height: 8),
@@ -307,7 +310,12 @@ class _AllOrdersScreenState extends State<AllOrdersScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Text(
               'Start shopping to see your orders here',
-              style: TextStyle(fontSize: 16, color: Colors.grey[500]),
+              style: TextStyle(
+                fontSize: 16,
+                color: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.color?.withOpacity(0.5),
+              ),
               textAlign: TextAlign.center,
               maxLines: 2,
             ),
@@ -327,7 +335,7 @@ class _AllOrdersScreenState extends State<AllOrdersScreen> {
               ),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: GlobalVariables.selectedNavBarColor,
+              backgroundColor: Theme.of(context).primaryColor,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
@@ -342,165 +350,190 @@ class _AllOrdersScreenState extends State<AllOrdersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(60),
-        child: AppBar(
-          flexibleSpace: Container(
-            decoration: const BoxDecoration(
-              gradient: GlobalVariables.appBarGradient,
-            ),
-          ),
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Container(
-                  height: 42,
-                  margin: const EdgeInsets.only(left: 15),
-                  child: Material(
-                    borderRadius: BorderRadius.circular(7),
-                    elevation: 1,
-                    child: TextFormField(
-                      onFieldSubmitted: navigateToSearchScreen,
-                      decoration: InputDecoration(
-                        prefixIcon: InkWell(
-                          onTap: () {},
-                          child: const Padding(
-                            padding: EdgeInsets.only(left: 6),
-                            child: Icon(
-                              Icons.search,
-                              color: Colors.black,
-                              size: 23,
-                            ),
-                          ),
-                        ),
-                        filled: true,
-                        fillColor: Colors.white,
-                        contentPadding: const EdgeInsets.only(top: 10),
-                        border: const OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(7)),
-                          borderSide: BorderSide.none,
-                        ),
-                        enabledBorder: const OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(7)),
-                          borderSide: BorderSide(
-                            color: Colors.black38,
-                            width: 1,
-                          ),
-                        ),
-                        hintText: 'Search Amazon.in',
-                        hintStyle: const TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 17,
-                        ),
-                      ),
-                    ),
-                  ),
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return Scaffold(
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(60),
+            child: AppBar(
+              flexibleSpace: Container(
+                decoration: BoxDecoration(
+                  gradient: themeProvider.getAppBarGradient(context),
                 ),
               ),
-              Container(
-                color: Colors.transparent,
-                height: 42,
-                margin: const EdgeInsets.symmetric(horizontal: 10),
-                child: const Icon(Icons.mic, color: Colors.black, size: 25),
-              ),
-            ],
-          ),
-        ),
-      ),
-      body: isLoading
-          ? const Loader()
-          : orders == null || orders!.isEmpty
-          ? _buildEmptyState()
-          : Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Colors.grey[50]!, Colors.white],
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Header với thiết kế đẹp hơn
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'All Your Orders',
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF2C3E50),
-                                  letterSpacing: 0.3,
+                  Expanded(
+                    child: Container(
+                      height: 42,
+                      margin: const EdgeInsets.only(left: 15),
+                      child: Material(
+                        borderRadius: BorderRadius.circular(7),
+                        elevation: 1,
+                        child: TextFormField(
+                          onFieldSubmitted: navigateToSearchScreen,
+                          decoration: InputDecoration(
+                            prefixIcon: InkWell(
+                              onTap: () {},
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 6),
+                                child: Icon(
+                                  Icons.search,
+                                  color: Theme.of(context).iconTheme.color,
+                                  size: 23,
                                 ),
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${orders!.length} orders found',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey[600],
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: GlobalVariables.selectedNavBarColor
-                                .withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(15),
-                            border: Border.all(
-                              color: GlobalVariables.selectedNavBarColor
-                                  .withOpacity(0.3),
                             ),
-                          ),
-                          child: Text(
-                            '${orders!.length}',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: GlobalVariables.selectedNavBarColor,
+                            filled: true,
+                            fillColor: Colors.white,
+                            contentPadding: const EdgeInsets.only(top: 10),
+                            border: const OutlineInputBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(7),
+                              ),
+                              borderSide: BorderSide.none,
+                            ),
+                            enabledBorder: const OutlineInputBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(7),
+                              ),
+                              borderSide: BorderSide(
+                                color: Colors.black38,
+                                width: 1,
+                              ),
+                            ),
+                            hintText: 'Search Amazon.in',
+                            hintStyle: const TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 17,
                             ),
                           ),
                         ),
-                      ],
+                      ),
                     ),
                   ),
-
-                  // Danh sách đơn hàng
-                  Expanded(
-                    child: RefreshIndicator(
-                      onRefresh: () async {
-                        fetchOrders();
-                      },
-                      child: ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: orders!.length,
-                        itemBuilder: (context, index) {
-                          return _buildOrderCard(orders![index]);
-                        },
-                      ),
+                  Container(
+                    color: Colors.transparent,
+                    height: 42,
+                    margin: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Icon(
+                      Icons.mic,
+                      color: Theme.of(context).iconTheme.color,
+                      size: 25,
                     ),
                   ),
                 ],
               ),
             ),
+          ),
+          body: isLoading
+              ? const Loader()
+              : orders == null || orders!.isEmpty
+              ? _buildEmptyState()
+              : Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Theme.of(context).scaffoldBackgroundColor,
+                        Theme.of(context).cardColor,
+                      ],
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header với thiết kế đẹp hơn
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'All Your Orders',
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(
+                                        context,
+                                      ).textTheme.headlineLarge?.color,
+                                      letterSpacing: 0.3,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '${orders!.length} orders found',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.color
+                                          ?.withOpacity(0.7),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: themeProvider
+                                    .getSelectedNavBarColor(context)
+                                    .withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(15),
+                                border: Border.all(
+                                  color: themeProvider
+                                      .getSelectedNavBarColor(context)
+                                      .withOpacity(0.3),
+                                ),
+                              ),
+                              child: Text(
+                                '${orders!.length}',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: themeProvider.getSelectedNavBarColor(
+                                    context,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Danh sách đơn hàng
+                      Expanded(
+                        child: RefreshIndicator(
+                          onRefresh: () async {
+                            fetchOrders();
+                          },
+                          child: ListView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            itemCount: orders!.length,
+                            itemBuilder: (context, index) {
+                              return _buildOrderCard(orders![index]);
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+        );
+      },
     );
   }
 }

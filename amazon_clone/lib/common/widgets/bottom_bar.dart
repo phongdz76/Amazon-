@@ -1,4 +1,4 @@
-import 'package:amazon_clone/constants/global_variables.dart';
+import 'package:amazon_clone/constants/theme.dart';
 import 'package:amazon_clone/features/account/screens/account_screen.dart';
 import 'package:amazon_clone/features/cart/screens/cart_screen.dart';
 import 'package:amazon_clone/features/home/screens/home_screen.dart';
@@ -37,10 +37,10 @@ class _BottomBarState extends State<BottomBar> {
       body: pages[_page],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).bottomNavigationBarTheme.backgroundColor,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Theme.of(context).shadowColor,
               blurRadius: 10,
               offset: const Offset(0, -2),
             ),
@@ -96,6 +96,7 @@ class _BottomBarState extends State<BottomBar> {
     int? badgeCount,
   }) {
     final isSelected = _page == index;
+    final themeProvider = Provider.of<ThemeProvider>(context);
 
     return GestureDetector(
       onTap: () => updatePage(index),
@@ -112,8 +113,8 @@ class _BottomBarState extends State<BottomBar> {
                 Icon(
                   isSelected ? activeIcon : icon,
                   color: isSelected
-                      ? GlobalVariables.selectedNavBarColor
-                      : GlobalVariables.unselectedNavBarColor,
+                      ? themeProvider.getSelectedNavBarColor(context)
+                      : themeProvider.getUnselectedNavBarColor(context),
                   size: 24,
                 ),
                 if (badgeCount != null && badgeCount > 0)
@@ -151,8 +152,8 @@ class _BottomBarState extends State<BottomBar> {
                 fontSize: 11,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                 color: isSelected
-                    ? GlobalVariables.selectedNavBarColor
-                    : GlobalVariables.unselectedNavBarColor,
+                    ? themeProvider.getSelectedNavBarColor(context)
+                    : themeProvider.getUnselectedNavBarColor(context),
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

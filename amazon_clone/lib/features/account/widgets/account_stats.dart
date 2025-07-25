@@ -41,15 +41,17 @@ class _AccountStatsState extends State<AccountStats> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       margin: const EdgeInsets.all(15),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Theme.of(context).shadowColor,
             spreadRadius: 1,
             blurRadius: 3,
             offset: const Offset(0, 2),
@@ -65,14 +67,22 @@ class _AccountStatsState extends State<AccountStats> {
             count: ordersCount.toString(),
             color: Colors.blue,
           ),
-          Container(height: 40, width: 1, color: Colors.grey[300]),
+          Container(
+            height: 40,
+            width: 1,
+            color: isDark ? Colors.grey[600] : Colors.grey[300],
+          ),
           _buildStatItem(
             icon: Icons.favorite_outline,
             title: 'Wishlist',
             count: wishlistCount.toString(),
             color: Colors.red,
           ),
-          Container(height: 40, width: 1, color: Colors.grey[300]),
+          Container(
+            height: 40,
+            width: 1,
+            color: isDark ? Colors.grey[600] : Colors.grey[300],
+          ),
           _buildStatItem(
             icon: Icons.star_outline,
             title: 'Reviews',
@@ -96,10 +106,22 @@ class _AccountStatsState extends State<AccountStats> {
         const SizedBox(height: 8),
         Text(
           count,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).textTheme.bodyLarge?.color,
+          ),
         ),
         const SizedBox(height: 4),
-        Text(title, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 12,
+            color: Theme.of(
+              context,
+            ).textTheme.bodySmall?.color?.withOpacity(0.7),
+          ),
+        ),
       ],
     );
   }

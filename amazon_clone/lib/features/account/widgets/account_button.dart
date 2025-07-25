@@ -7,22 +7,26 @@ class AccountButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Expanded(
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 15),
         height: 40,
         decoration: BoxDecoration(
-          border: Border.all(
-            color: Colors.white,
-            width: 1,
-          ),
+          border: Border.all(color: Theme.of(context).cardColor, width: 1),
           borderRadius: BorderRadius.circular(50),
-          color: Colors.white
+          color: Theme.of(context).cardColor,
         ),
         child: OutlinedButton(
-            style: OutlinedButton.styleFrom(
-            backgroundColor: Colors.black.withAlpha(8), // subtle background
-            side: const BorderSide(color: Colors.black12, width: 1),
+          style: OutlinedButton.styleFrom(
+            backgroundColor: isDark
+                ? Colors.white.withAlpha(8)
+                : Colors.black.withAlpha(8),
+            side: BorderSide(
+              color: isDark ? Colors.white24 : Colors.black12,
+              width: 1,
+            ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(50),
             ),
@@ -30,8 +34,8 @@ class AccountButton extends StatelessWidget {
           onPressed: onTap,
           child: Text(
             text,
-            style: const TextStyle(
-              color: Colors.black,
+            style: TextStyle(
+              color: Theme.of(context).textTheme.bodyMedium?.color,
               fontWeight: FontWeight.normal,
             ),
           ),

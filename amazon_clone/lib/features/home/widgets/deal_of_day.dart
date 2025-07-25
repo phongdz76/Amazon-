@@ -1,9 +1,11 @@
 import 'package:amazon_clone/common/widgets/loader.dart';
 import 'package:amazon_clone/common/widgets/wishlist_button.dart';
+import 'package:amazon_clone/constants/theme.dart';
 import 'package:amazon_clone/features/home/services/home_services.dart';
 import 'package:amazon_clone/features/product_details/screens/product_details_screen.dart';
 import 'package:amazon_clone/models/product.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class DealOfDay extends StatefulWidget {
   const DealOfDay({super.key});
@@ -196,214 +198,264 @@ class _DealOfDayState extends State<DealOfDay> with TickerProviderStateMixin {
     return totalRating / product!.rating!.length;
   }
 
+  // Build enhanced rating widget with theme support
+  Widget _buildRatingWidget() {
+    double averageRating = _calculateAverageRating();
+    int totalReviews = product?.rating?.length ?? 0;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.orange.withOpacity(0.15),
+            Colors.amber.withOpacity(0.15),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.orange.withOpacity(0.3), width: 1),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Enhanced star rating display
+          ...List.generate(5, (index) {
+            if (index < averageRating.floor()) {
+              return const Icon(Icons.star, size: 14, color: Colors.orange);
+            } else if (index < averageRating) {
+              return const Icon(
+                Icons.star_half,
+                size: 14,
+                color: Colors.orange,
+              );
+            } else {
+              return Icon(Icons.star_border, size: 14, color: Colors.grey[400]);
+            }
+          }),
+          const SizedBox(width: 6),
+          Text(
+            averageRating.toStringAsFixed(1),
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: Colors.orange,
+            ),
+          ),
+          if (totalReviews > 0) ...[
+            const SizedBox(width: 4),
+            Text(
+              '($totalReviews)',
+              style: TextStyle(
+                fontSize: 11,
+                color: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return product == null
         ? const Loader()
         : product!.name.isEmpty
         ? const SizedBox()
-        : GestureDetector(
-            onTapDown: (_) => _animationController.forward(),
-            onTapUp: (_) {
-              _animationController.reverse();
-              navigateToDetailScreen();
-            },
-            onTapCancel: () => _animationController.reverse(),
-            child: AnimatedBuilder(
-              animation: _scaleAnimation,
-              builder: (context, child) {
-                return Transform.scale(
-                  scale: _scaleAnimation.value,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 15),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
-                          blurRadius: 20,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Header with Deal Badge
-                        Padding(
-                          padding: const EdgeInsets.all(15),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              _buildDealBadge(),
-                              Text(
-                                'Ends in 12h 34m',
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        // Product Image with Wishlist Button
-                        Container(
-                          width: double.infinity,
-                          height: 220,
-                          margin: const EdgeInsets.symmetric(horizontal: 15),
-                          child: Stack(
-                            children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.05),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Image.network(
-                                    product!.images[0],
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Container(
-                                        color: Colors.grey[200],
-                                        child: const Center(
-                                          child: Icon(
-                                            Icons.image_not_supported,
-                                            color: Colors.grey,
-                                            size: 50,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
-                              Positioned(
-                                top: 12,
-                                right: 12,
-                                child: WishlistButton(
-                                  productId: product!.id!,
-                                  size: 24,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: 15),
-
-                        // Price Section
-                        _buildPriceSection(),
-
-                        // Product Name
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 15),
-                          child: Text(
-                            product!.name,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              height: 1.3,
+        : Consumer<ThemeProvider>(
+            builder: (context, themeProvider, child) {
+              return GestureDetector(
+                onTapDown: (_) => _animationController.forward(),
+                onTapUp: (_) {
+                  _animationController.reverse();
+                  navigateToDetailScreen();
+                },
+                onTapCancel: () => _animationController.reverse(),
+                child: AnimatedBuilder(
+                  animation: _scaleAnimation,
+                  builder: (context, child) {
+                    return Transform.scale(
+                      scale: _scaleAnimation.value,
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 15),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).cardColor,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Theme.of(
+                                context,
+                              ).shadowColor.withOpacity(0.08),
+                              blurRadius: 20,
+                              offset: const Offset(0, 4),
                             ),
-                          ),
+                          ],
                         ),
-
-                        const SizedBox(height: 15),
-
-                        // Additional Images
-                        _buildProductImages(),
-
-                        const SizedBox(height: 15),
-
-                        // See All Deals Button
-                        Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 15),
-                          padding: const EdgeInsets.symmetric(vertical: 15),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              TextButton.icon(
-                                onPressed: () {
-                                  // TODO: Navigate to all deals
-                                },
-                                icon: const Icon(
-                                  Icons.local_fire_department,
-                                  size: 18,
-                                  color: Colors.blue,
-                                ),
-                                label: const Text(
-                                  'See all deals',
-                                  style: TextStyle(
-                                    color: Colors.blue,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Header with Deal Badge
+                            Padding(
+                              padding: const EdgeInsets.all(15),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  _buildDealBadge(),
+                                  Text(
+                                    'Ends in 12h 34m',
+                                    style: TextStyle(
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.color
+                                          ?.withOpacity(0.7),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
+                                ],
+                              ),
+                            ),
+
+                            // Product Image with Wishlist Button
+                            Container(
+                              width: double.infinity,
+                              height: 220,
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 15,
+                              ),
+                              child: Stack(
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.05),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: Image.network(
+                                        product!.images[0],
+                                        fit: BoxFit.cover,
+                                        width: double.infinity,
+                                        height: double.infinity,
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                              return Container(
+                                                color: Colors.grey[200],
+                                                child: const Center(
+                                                  child: Icon(
+                                                    Icons.image_not_supported,
+                                                    color: Colors.grey,
+                                                    size: 50,
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    top: 12,
+                                    right: 12,
+                                    child: WishlistButton(
+                                      productId: product!.id!,
+                                      size: 24,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            const SizedBox(height: 15),
+
+                            // Price Section
+                            _buildPriceSection(),
+
+                            // Product Name
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 15,
+                              ),
+                              child: Text(
+                                product!.name,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  height: 1.3,
+                                  color: Theme.of(
+                                    context,
+                                  ).textTheme.bodyLarge?.color,
                                 ),
                               ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(
-                                      Icons.star,
-                                      size: 16,
-                                      color: Colors.orange,
+                            ),
+
+                            const SizedBox(height: 15),
+
+                            // Additional Images
+                            _buildProductImages(),
+
+                            const SizedBox(height: 15),
+
+                            // See All Deals Button
+                            Container(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 15,
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 15),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  TextButton.icon(
+                                    onPressed: () {
+                                      // TODO: Navigate to all deals
+                                    },
+                                    icon: Icon(
+                                      Icons.local_fire_department,
+                                      size: 18,
+                                      color:
+                                          Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? Colors.blue[300]
+                                          : Colors.blue,
                                     ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      _calculateAverageRating().toStringAsFixed(
-                                        1,
-                                      ),
-                                      style: const TextStyle(
-                                        fontSize: 12,
+                                    label: Text(
+                                      'See all deals',
+                                      style: TextStyle(
+                                        color:
+                                            Theme.of(context).brightness ==
+                                                Brightness.dark
+                                            ? Colors.blue[300]
+                                            : Colors.blue,
+                                        fontSize: 14,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
-                                    if (product!.rating != null &&
-                                        product!.rating!.isNotEmpty) ...[
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        '(${product!.rating!.length})',
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: Colors.grey[600],
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
-                                  ],
-                                ),
+                                  ),
+                                  _buildRatingWidget(),
+                                ],
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
           );
   }
 }

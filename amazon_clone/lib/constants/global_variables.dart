@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'theme.dart';
 
 // API endpoint
 String uri = 'http://192.168.1.7:3000';
 
-
 class GlobalVariables {
+  // Deprecated - Use AppColors instead
   static const appBarGradient = LinearGradient(
     colors: [
       Color.fromARGB(255, 29, 201, 192),
@@ -13,12 +15,33 @@ class GlobalVariables {
     stops: [0.5, 1.0],
   );
 
- 
+  // Deprecated - Use AppColors instead
   static const secondaryColor = Color.fromRGBO(255, 153, 0, 1);
   static const backgroundColor = Colors.white;
   static const Color greyBackgroundCOlor = Color(0xffebecee);
   static var selectedNavBarColor = Colors.cyan[800]!;
   static const unselectedNavBarColor = Colors.black87;
+
+  // Helper methods for theme-aware colors
+  static Color getSelectedNavBarColor(BuildContext context) {
+    final themeProvider = context.read<ThemeProvider>();
+    return themeProvider.getSelectedNavBarColor(context);
+  }
+
+  static Color getUnselectedNavBarColor(BuildContext context) {
+    final themeProvider = context.read<ThemeProvider>();
+    return themeProvider.getUnselectedNavBarColor(context);
+  }
+
+  static Color getSecondaryColor(BuildContext context) {
+    final themeProvider = context.read<ThemeProvider>();
+    return themeProvider.getSecondaryColor(context);
+  }
+
+  static Gradient getAppBarGradient(BuildContext context) {
+    final themeProvider = context.read<ThemeProvider>();
+    return themeProvider.getAppBarGradient(context);
+  }
 
   // Static Images and URLs for the app
   static const List<String> carouselImages = [

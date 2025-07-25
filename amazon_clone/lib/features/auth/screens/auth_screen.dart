@@ -1,7 +1,9 @@
 import 'package:amazon_clone/constants/global_variables.dart';
+import 'package:amazon_clone/constants/theme.dart';
 import 'package:amazon_clone/features/auth/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:amazon_clone/common/widgets/custom_textfield.dart';
+import 'package:provider/provider.dart';
 
 enum Auth { signUp, signIn }
 
@@ -66,219 +68,247 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            stops: const [0.0, 0.4, 0.7, 1.0],
-            colors: [
-              const Color(0xFF232F3E), // Amazon dark blue
-              GlobalVariables.selectedNavBarColor,
-              const Color(0xFF00A8CC), // Teal blue
-              const Color(0xFFFF9500), // Amazon orange
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: FadeTransition(
-            opacity: _fadeAnimation,
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 40),
-                    // Logo and Welcome Section
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.95),
-                        borderRadius: BorderRadius.circular(25),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 25,
-                            offset: const Offset(0, 10),
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return Scaffold(
+          body: Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: const [0.0, 0.4, 0.7, 1.0],
+                colors: [
+                  themeProvider.isDarkMode
+                      ? const Color(0xFF1A1A1A)
+                      : const Color(0xFF232F3E),
+                  GlobalVariables.selectedNavBarColor,
+                  const Color(0xFF00A8CC), // Teal blue
+                  const Color(0xFFFF9500), // Amazon orange
+                ],
+              ),
+            ),
+            child: SafeArea(
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 40),
+                        // Logo and Welcome Section
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Theme.of(
+                              context,
+                            ).cardColor.withOpacity(0.95),
+                            borderRadius: BorderRadius.circular(25),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Theme.of(
+                                  context,
+                                ).shadowColor.withOpacity(0.2),
+                                blurRadius: 25,
+                                offset: const Offset(0, 10),
+                              ),
+                              BoxShadow(
+                                color: Theme.of(
+                                  context,
+                                ).cardColor.withOpacity(0.1),
+                                blurRadius: 10,
+                                offset: const Offset(0, -5),
+                              ),
+                            ],
                           ),
-                          BoxShadow(
-                            color: Colors.white.withOpacity(0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, -5),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.shopping_bag_rounded,
-                            size: 80,
-                            color: GlobalVariables.selectedNavBarColor,
-                          ),
-                          const SizedBox(height: 20),
-                          Text(
-                            'Welcome to Amazon Clone',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: GlobalVariables.selectedNavBarColor,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            'Sign in to continue shopping',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey[600],
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 30),
-
-                    // Auth Toggle Buttons
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.95),
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.15),
-                            blurRadius: 20,
-                            offset: const Offset(0, 8),
-                          ),
-                          BoxShadow(
-                            color: Colors.white.withOpacity(0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, -3),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _auth = Auth.signUp;
-                                });
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  gradient: _auth == Auth.signUp
-                                      ? LinearGradient(
-                                          colors: [
-                                            GlobalVariables.selectedNavBarColor,
-                                            GlobalVariables.selectedNavBarColor
-                                                .withOpacity(0.8),
-                                          ],
-                                        )
-                                      : null,
-                                  color: _auth == Auth.signUp
-                                      ? null
-                                      : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(18),
-                                  boxShadow: _auth == Auth.signUp
-                                      ? [
-                                          BoxShadow(
-                                            color: GlobalVariables
-                                                .selectedNavBarColor
-                                                .withOpacity(0.3),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 4),
-                                          ),
-                                        ]
-                                      : null,
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.shopping_bag_rounded,
+                                size: 80,
+                                color: GlobalVariables.selectedNavBarColor,
+                              ),
+                              const SizedBox(height: 20),
+                              Text(
+                                'Welcome to Amazon Clone',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: GlobalVariables.selectedNavBarColor,
                                 ),
-                                child: Text(
-                                  'Sign Up',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: _auth == Auth.signUp
-                                        ? Colors.white
-                                        : GlobalVariables.selectedNavBarColor,
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                'Sign in to continue shopping',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.color
+                                      ?.withOpacity(0.7),
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+
+                        // Auth Toggle Buttons
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Theme.of(
+                              context,
+                            ).cardColor.withOpacity(0.95),
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Theme.of(
+                                  context,
+                                ).shadowColor.withOpacity(0.15),
+                                blurRadius: 20,
+                                offset: const Offset(0, 8),
+                              ),
+                              BoxShadow(
+                                color: Theme.of(
+                                  context,
+                                ).cardColor.withOpacity(0.1),
+                                blurRadius: 10,
+                                offset: const Offset(0, -3),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _auth = Auth.signUp;
+                                    });
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      gradient: _auth == Auth.signUp
+                                          ? LinearGradient(
+                                              colors: [
+                                                GlobalVariables
+                                                    .selectedNavBarColor,
+                                                GlobalVariables
+                                                    .selectedNavBarColor
+                                                    .withOpacity(0.8),
+                                              ],
+                                            )
+                                          : null,
+                                      color: _auth == Auth.signUp
+                                          ? null
+                                          : Colors.transparent,
+                                      borderRadius: BorderRadius.circular(18),
+                                      boxShadow: _auth == Auth.signUp
+                                          ? [
+                                              BoxShadow(
+                                                color: GlobalVariables
+                                                    .selectedNavBarColor
+                                                    .withOpacity(0.3),
+                                                blurRadius: 8,
+                                                offset: const Offset(0, 4),
+                                              ),
+                                            ]
+                                          : null,
+                                    ),
+                                    child: Text(
+                                      'Sign Up',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: _auth == Auth.signUp
+                                            ? Colors.white
+                                            : GlobalVariables
+                                                  .selectedNavBarColor,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
                                   ),
-                                  textAlign: TextAlign.center,
                                 ),
                               ),
-                            ),
-                          ),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _auth = Auth.signIn;
-                                });
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  gradient: _auth == Auth.signIn
-                                      ? LinearGradient(
-                                          colors: [
-                                            GlobalVariables.selectedNavBarColor,
-                                            GlobalVariables.selectedNavBarColor
-                                                .withOpacity(0.8),
-                                          ],
-                                        )
-                                      : null,
-                                  color: _auth == Auth.signIn
-                                      ? null
-                                      : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(18),
-                                  boxShadow: _auth == Auth.signIn
-                                      ? [
-                                          BoxShadow(
-                                            color: GlobalVariables
-                                                .selectedNavBarColor
-                                                .withOpacity(0.3),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 4),
-                                          ),
-                                        ]
-                                      : null,
-                                ),
-                                child: Text(
-                                  'Sign In',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: _auth == Auth.signIn
-                                        ? Colors.white
-                                        : GlobalVariables.selectedNavBarColor,
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _auth = Auth.signIn;
+                                    });
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      gradient: _auth == Auth.signIn
+                                          ? LinearGradient(
+                                              colors: [
+                                                GlobalVariables
+                                                    .selectedNavBarColor,
+                                                GlobalVariables
+                                                    .selectedNavBarColor
+                                                    .withOpacity(0.8),
+                                              ],
+                                            )
+                                          : null,
+                                      color: _auth == Auth.signIn
+                                          ? null
+                                          : Colors.transparent,
+                                      borderRadius: BorderRadius.circular(18),
+                                      boxShadow: _auth == Auth.signIn
+                                          ? [
+                                              BoxShadow(
+                                                color: GlobalVariables
+                                                    .selectedNavBarColor
+                                                    .withOpacity(0.3),
+                                                blurRadius: 8,
+                                                offset: const Offset(0, 4),
+                                              ),
+                                            ]
+                                          : null,
+                                    ),
+                                    child: Text(
+                                      'Sign In',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: _auth == Auth.signIn
+                                            ? Colors.white
+                                            : GlobalVariables
+                                                  .selectedNavBarColor,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
                                   ),
-                                  textAlign: TextAlign.center,
                                 ),
                               ),
-                            ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 30),
+                        ),
+                        const SizedBox(height: 30),
 
-                    // Forms
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      child: _auth == Auth.signUp
-                          ? _buildSignUpForm()
-                          : _buildSignInForm(),
+                        // Forms
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          child: _auth == Auth.signUp
+                              ? _buildSignUpForm()
+                              : _buildSignInForm(),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -287,16 +317,16 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
       key: const ValueKey('signUp'),
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.98),
+        color: Theme.of(context).cardColor.withOpacity(0.98),
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Theme.of(context).shadowColor.withOpacity(0.2),
             blurRadius: 25,
             offset: const Offset(0, 15),
           ),
           BoxShadow(
-            color: Colors.white.withOpacity(0.1),
+            color: Theme.of(context).cardColor.withOpacity(0.1),
             blurRadius: 10,
             offset: const Offset(0, -5),
           ),
@@ -372,16 +402,16 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
       key: const ValueKey('signIn'),
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.98),
+        color: Theme.of(context).cardColor.withOpacity(0.98),
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Theme.of(context).shadowColor.withOpacity(0.2),
             blurRadius: 25,
             offset: const Offset(0, 15),
           ),
           BoxShadow(
-            color: Colors.white.withOpacity(0.1),
+            color: Theme.of(context).cardColor.withOpacity(0.1),
             blurRadius: 10,
             offset: const Offset(0, -5),
           ),

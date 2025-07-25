@@ -85,7 +85,7 @@ class _ProductListState extends State<ProductList> {
             Icon(
               Icons.shopping_bag_outlined,
               size: 64,
-              color: Colors.grey.shade400,
+              color: Theme.of(context).iconTheme.color?.withOpacity(0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -93,13 +93,20 @@ class _ProductListState extends State<ProductList> {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
-                color: Colors.grey.shade600,
+                color: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.color?.withOpacity(0.8),
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'Check back later for new arrivals',
-              style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.color?.withOpacity(0.6),
+              ),
             ),
           ],
         ),
@@ -114,25 +121,29 @@ class _ProductListState extends State<ProductList> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'All Products',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.grey.shade700
+                      : Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   '${products!.length} items',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey.shade600,
+                    color: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.color?.withOpacity(0.7),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -167,18 +178,18 @@ class _ProductListState extends State<ProductList> {
                     onTap: () => navigateToProductDetails(product),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.08),
+                            color: Theme.of(context).shadowColor,
                             spreadRadius: 0,
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
                         ],
                         border: Border.all(
-                          color: Colors.grey.shade200,
+                          color: Theme.of(context).dividerColor,
                           width: 0.5,
                         ),
                       ),
@@ -313,10 +324,12 @@ class _ProductListState extends State<ProductList> {
                                     flex: 2,
                                     child: Text(
                                       product.name,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 12, // Giảm size để fit better
                                         fontWeight: FontWeight.w600,
-                                        color: Colors.black87,
+                                        color: Theme.of(
+                                          context,
+                                        ).textTheme.bodyLarge?.color,
                                         height: 1.2, // Line height tối ưu
                                       ),
                                       maxLines: 2,
@@ -335,7 +348,11 @@ class _ProductListState extends State<ProductList> {
                                         '(${product.rating?.length ?? 0})',
                                         style: TextStyle(
                                           fontSize: 10, // Giảm size
-                                          color: Colors.grey.shade600,
+                                          color: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall
+                                              ?.color
+                                              ?.withOpacity(0.7),
                                         ),
                                       ),
                                     ],
