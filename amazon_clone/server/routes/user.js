@@ -149,4 +149,47 @@ userRouter.get("/api/orders/me", auth, async (req, res) => {
   }
 });
 
+// Add to wishlist
+userRouter.post("/api/add-to-wishlist", auth, async (req, res) => {
+  try {
+    const { productId } = req.body;
+    let user = await User.findById(req.user);
+    
+    // Check if product is already in wishlist
+    if (!user.wishlist.includes(productId)) {
+      user.wishlist.push(productId);
+      user = await user.save();
+    }
+    
+    res.json(user);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Remove from wishlist
+userRouter.delete("/api/remove-from-wishlist", auth, async (req, res) => {
+  try {
+    const { productId } = req.body;
+    let user = await User.findById(req.user);
+    
+    user.wishlist = user.wishlist.filter(id => !id.equals(productId));
+    user = await user.save();
+    
+    res.json(user);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Get wishlist
+userRouter.get("/api/wishlist", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user).populate('wishlist');
+    res.json(user.wishlist);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 module.exports = userRouter;

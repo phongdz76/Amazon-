@@ -1,4 +1,5 @@
 import 'package:amazon_clone/common/widgets/stars.dart';
+import 'package:amazon_clone/common/widgets/wishlist_button.dart';
 import 'package:amazon_clone/features/product_details/screens/product_details_screen.dart';
 import 'package:amazon_clone/models/product.dart';
 import 'package:flutter/material.dart';
@@ -53,51 +54,61 @@ class SearchedProduct extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Product Image
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
+                // Product Image with Wishlist Button
+                Stack(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      product.images[0],
-                      fit: BoxFit.cover,
-                      height: 120,
-                      width: 120,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        height: 120,
-                        width: 120,
-                        color: theme.colorScheme.surfaceVariant,
-                        child: Icon(
-                          Icons.image_not_supported,
-                          color: theme.colorScheme.onSurfaceVariant,
-                          size: 32,
-                        ),
-                      ),
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Container(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.network(
+                          product.images[0],
+                          fit: BoxFit.cover,
                           height: 120,
                           width: 120,
-                          color: theme.colorScheme.surfaceVariant,
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: theme.colorScheme.primary,
-                            ),
-                          ),
-                        );
-                      },
+                          errorBuilder: (context, error, stackTrace) =>
+                              Container(
+                                height: 120,
+                                width: 120,
+                                color: theme.colorScheme.surfaceVariant,
+                                child: Icon(
+                                  Icons.image_not_supported,
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                  size: 32,
+                                ),
+                              ),
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Container(
+                              height: 120,
+                              width: 120,
+                              color: theme.colorScheme.surfaceVariant,
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
                     ),
-                  ),
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: WishlistButton(productId: product.id!, size: 20),
+                    ),
+                  ],
                 ),
 
                 const SizedBox(width: 16),
@@ -123,7 +134,7 @@ class SearchedProduct extends StatelessWidget {
                       const SizedBox(height: 8),
 
                       // Rating
-                      Stars(rating: avgRating,),
+                      Stars(rating: avgRating),
 
                       const SizedBox(height: 12),
 

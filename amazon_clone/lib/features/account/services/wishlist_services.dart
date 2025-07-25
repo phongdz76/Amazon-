@@ -29,6 +29,11 @@ class WishlistServices {
         response: res,
         context: context,
         onSuccess: () {
+          // Update user data with new wishlist
+          final updatedUser = userProvider.user.copyWith(
+            wishlist: List<String>.from(jsonDecode(res.body)['wishlist'] ?? []),
+          );
+          userProvider.setUserFromModel(updatedUser);
           showSnackBar(context, 'Added to wishlist!');
         },
       );
@@ -57,6 +62,11 @@ class WishlistServices {
         response: res,
         context: context,
         onSuccess: () {
+          // Update user data with new wishlist
+          final updatedUser = userProvider.user.copyWith(
+            wishlist: List<String>.from(jsonDecode(res.body)['wishlist'] ?? []),
+          );
+          userProvider.setUserFromModel(updatedUser);
           showSnackBar(context, 'Removed from wishlist!');
         },
       );

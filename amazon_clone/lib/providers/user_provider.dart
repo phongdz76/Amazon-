@@ -14,6 +14,7 @@ class UserProvider extends ChangeNotifier {
     type: '',
     token: '',
     cart: [],
+    wishlist: [],
   );
 
   User get user => _user;
@@ -47,7 +48,7 @@ class UserProvider extends ChangeNotifier {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('x-auth-token');
       String? userData = prefs.getString('user-data');
-      
+
       if (token != null && userData != null) {
         _user = User.fromJson(userData);
         notifyListeners();
@@ -63,7 +64,7 @@ class UserProvider extends ChangeNotifier {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.remove('x-auth-token');
       await prefs.remove('user-data');
-      
+
       _user = User(
         id: '',
         name: '',
@@ -73,6 +74,7 @@ class UserProvider extends ChangeNotifier {
         type: '',
         token: '',
         cart: [],
+        wishlist: [],
       );
       notifyListeners();
     } catch (e) {
@@ -84,7 +86,7 @@ class UserProvider extends ChangeNotifier {
   Future<bool> refreshUserData() async {
     try {
       if (_user.token.isEmpty) return false;
-      
+
       final response = await http.get(
         Uri.parse('$uri/'),
         headers: {
@@ -92,7 +94,7 @@ class UserProvider extends ChangeNotifier {
           'x-auth-token': _user.token,
         },
       );
-      
+
       if (response.statusCode == 200) {
         _user = User.fromJson(response.body);
         _saveUserToPrefs();

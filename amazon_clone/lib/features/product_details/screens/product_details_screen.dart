@@ -1,5 +1,6 @@
 import 'package:amazon_clone/common/widgets/stars.dart';
 import 'package:amazon_clone/constants/global_variables.dart';
+import 'package:amazon_clone/features/account/services/wishlist_services.dart';
 import 'package:amazon_clone/features/address/screens/address_screen.dart'; // Thêm import này
 import 'package:amazon_clone/features/product_details/services/product_details_service.dart';
 import 'package:amazon_clone/features/search/screens/search_screen.dart';
@@ -21,6 +22,7 @@ class ProductDetailsScreen extends StatefulWidget {
 
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   final ProductDetailsService productDetailsService = ProductDetailsService();
+  final WishlistServices wishlistServices = WishlistServices();
   double avgRating = 0;
   double myRating = 0;
   bool isInWishlist = false;
@@ -69,6 +71,12 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     if (totalRating != 0) {
       avgRating = totalRating / widget.product.rating!.length;
     }
+
+    // Check if product is in wishlist
+    final user = Provider.of<UserProvider>(context, listen: false).user;
+    if (user.wishlist != null) {
+      isInWishlist = user.wishlist!.contains(widget.product.id);
+    }
   }
 
   void addToCart() {
@@ -76,19 +84,20 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   }
 
   void toggleWishlist() {
+    if (isInWishlist) {
+      wishlistServices.removeFromWishlist(
+        context: context,
+        productId: widget.product.id!,
+      );
+    } else {
+      wishlistServices.addToWishlist(
+        context: context,
+        productId: widget.product.id!,
+      );
+    }
     setState(() {
       isInWishlist = !isInWishlist;
     });
-    // Có thể thêm logic gọi API để lưu wishlist ở đây
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          isInWishlist ? 'Added to Wishlist' : 'Removed from Wishlist',
-        ),
-        duration: const Duration(seconds: 2),
-        backgroundColor: isInWishlist ? Colors.green : Colors.red,
-      ),
-    );
   }
 
   @override
