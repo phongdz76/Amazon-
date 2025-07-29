@@ -1,10 +1,11 @@
 import 'package:amazon_clone/common/widgets/loader.dart';
 import 'package:amazon_clone/common/widgets/stars.dart';
-import 'package:amazon_clone/constants/global_variables.dart';
+import 'package:amazon_clone/constants/theme.dart';
 import 'package:amazon_clone/features/account/services/wishlist_services.dart';
 import 'package:amazon_clone/features/product_details/screens/product_details_screen.dart';
 import 'package:amazon_clone/models/product.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class WishlistScreen extends StatefulWidget {
   static const String routeName = '/wishlist';
@@ -69,27 +70,35 @@ class _WishlistScreenState extends State<WishlistScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(60),
         child: AppBar(
           flexibleSpace: Container(
-            decoration: const BoxDecoration(
-              gradient: GlobalVariables.appBarGradient,
+            decoration: BoxDecoration(
+              gradient: themeProvider.getAppBarGradient(context),
             ),
           ),
-          title: const Text(
+          title: Text(
             'My Wishlist',
             style: TextStyle(
-              color: Colors.black,
+              color:
+                  Theme.of(context).appBarTheme.titleTextStyle?.color ??
+                  (themeProvider.isDarkMode ? Colors.white : Colors.black),
               fontWeight: FontWeight.bold,
               fontSize: 20,
             ),
           ),
           centerTitle: false,
           elevation: 0,
+          iconTheme: IconThemeData(
+            color: themeProvider.isDarkMode ? Colors.white : Colors.black,
+          ),
         ),
       ),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: isLoading
           ? const Center(child: Loader())
           : wishlistProducts.isEmpty
@@ -99,6 +108,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
   }
 
   Widget _buildEmptyWishlist() {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32.0),
@@ -109,14 +120,23 @@ class _WishlistScreenState extends State<WishlistScreen> {
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: Colors.grey.shade50,
+                color: themeProvider.isDarkMode
+                    ? AppColors.darkSurface.withOpacity(0.5)
+                    : Colors.grey.shade50,
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.grey.shade200, width: 2),
+                border: Border.all(
+                  color: themeProvider.isDarkMode
+                      ? AppColors.darkDividerColor
+                      : Colors.grey.shade200,
+                  width: 2,
+                ),
               ),
               child: Icon(
                 Icons.favorite_outline,
                 size: 64,
-                color: Colors.grey.shade400,
+                color: themeProvider.isDarkMode
+                    ? AppColors.darkTextSecondary
+                    : Colors.grey.shade400,
               ),
             ),
             const SizedBox(height: 24),
@@ -125,7 +145,11 @@ class _WishlistScreenState extends State<WishlistScreen> {
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey.shade700,
+                color:
+                    Theme.of(context).textTheme.headlineSmall?.color ??
+                    (themeProvider.isDarkMode
+                        ? AppColors.darkOnBackground
+                        : Colors.grey.shade700),
               ),
             ),
             const SizedBox(height: 12),
@@ -134,7 +158,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.grey.shade500,
+                color: themeProvider.getTextSecondaryColor(context),
                 height: 1.4,
               ),
             ),
@@ -144,8 +168,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
                 Navigator.pop(context);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: GlobalVariables.selectedNavBarColor,
-                foregroundColor: Colors.white,
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 32,
                   vertical: 12,
@@ -167,6 +191,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
   }
 
   Widget _buildWishlistContent() {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Column(
       children: [
         // Header with item count
@@ -174,10 +200,10 @@ class _WishlistScreenState extends State<WishlistScreen> {
           width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).cardColor,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Theme.of(context).shadowColor,
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -191,7 +217,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade800,
+                  color: Theme.of(context).textTheme.titleLarge?.color,
                 ),
               ),
               Container(
@@ -200,7 +226,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: GlobalVariables.selectedNavBarColor.withOpacity(0.1),
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: Text(
@@ -208,7 +234,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: GlobalVariables.selectedNavBarColor,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
               ),
@@ -218,22 +244,25 @@ class _WishlistScreenState extends State<WishlistScreen> {
 
         // Products Grid
         Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.75,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-              ),
-              itemCount: wishlistProducts.length,
-              itemBuilder: (context, index) {
-                final product = wishlistProducts[index];
-                final avgRating = calculateAverageRating(product);
+          child: Container(
+            color: themeProvider.getSurfaceVariantColor(context),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 0.75,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                ),
+                itemCount: wishlistProducts.length,
+                itemBuilder: (context, index) {
+                  final product = wishlistProducts[index];
+                  final avgRating = calculateAverageRating(product);
 
-                return _buildProductCard(product, avgRating);
-              },
+                  return _buildProductCard(product, avgRating);
+                },
+              ),
             ),
           ),
         ),
@@ -242,6 +271,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
   }
 
   Widget _buildProductCard(Product product, double avgRating) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Hero(
       tag: 'wishlist-${product.id}',
       child: Material(
@@ -251,17 +282,22 @@ class _WishlistScreenState extends State<WishlistScreen> {
           onTap: () => navigateToProductDetails(product),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
+                  color: Theme.of(context).shadowColor,
                   spreadRadius: 0,
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
               ],
-              border: Border.all(color: Colors.grey.shade200, width: 0.5),
+              border: Border.all(
+                color: themeProvider.isDarkMode
+                    ? AppColors.darkDividerColor
+                    : Colors.grey.shade200,
+                width: 0.5,
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -292,7 +328,9 @@ class _WishlistScreenState extends State<WishlistScreen> {
                             loadingBuilder: (context, child, loadingProgress) {
                               if (loadingProgress == null) return child;
                               return Container(
-                                color: Colors.grey.shade50,
+                                color: themeProvider.isDarkMode
+                                    ? AppColors.darkSurface
+                                    : Colors.grey.shade50,
                                 child: Center(
                                   child: SizedBox(
                                     width: 24,
@@ -308,7 +346,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                                           : null,
                                       strokeWidth: 2,
                                       valueColor: AlwaysStoppedAnimation<Color>(
-                                        GlobalVariables.selectedNavBarColor,
+                                        Theme.of(context).colorScheme.primary,
                                       ),
                                     ),
                                   ),
@@ -317,21 +355,25 @@ class _WishlistScreenState extends State<WishlistScreen> {
                             },
                             errorBuilder: (context, error, stackTrace) {
                               return Container(
-                                color: Colors.grey.shade50,
+                                color: themeProvider.isDarkMode
+                                    ? AppColors.darkSurface
+                                    : Colors.grey.shade50,
                                 child: Center(
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Icon(
                                         Icons.image_not_supported_outlined,
-                                        color: Colors.grey.shade400,
+                                        color: themeProvider
+                                            .getTextSecondaryColor(context),
                                         size: 32,
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
                                         'No Image',
                                         style: TextStyle(
-                                          color: Colors.grey.shade500,
+                                          color: themeProvider
+                                              .getTextTertiaryColor(context),
                                           fontSize: 10,
                                         ),
                                       ),
@@ -377,11 +419,15 @@ class _WishlistScreenState extends State<WishlistScreen> {
                           child: Container(
                             padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.9),
+                              color:
+                                  (themeProvider.isDarkMode
+                                          ? AppColors.darkSurface
+                                          : Colors.white)
+                                      .withOpacity(0.9),
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
+                                  color: Theme.of(context).shadowColor,
                                   blurRadius: 4,
                                   offset: const Offset(0, 2),
                                 ),
@@ -413,10 +459,12 @@ class _WishlistScreenState extends State<WishlistScreen> {
                           flex: 2,
                           child: Text(
                             product.name,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
-                              color: Colors.black87,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyLarge?.color,
                               height: 1.3,
                             ),
                             maxLines: 2,
@@ -434,7 +482,9 @@ class _WishlistScreenState extends State<WishlistScreen> {
                               '(${product.rating?.length ?? 0})',
                               style: TextStyle(
                                 fontSize: 10,
-                                color: Colors.grey.shade600,
+                                color: themeProvider.getTextSecondaryColor(
+                                  context,
+                                ),
                               ),
                             ),
                           ],
@@ -472,8 +522,12 @@ class _WishlistScreenState extends State<WishlistScreen> {
                           style: TextStyle(
                             fontSize: 10,
                             color: product.quantity > 0
-                                ? Colors.green.shade600
-                                : Colors.red.shade600,
+                                ? (themeProvider.isDarkMode
+                                      ? AppColors.darkSuccessColor
+                                      : Colors.green.shade600)
+                                : (themeProvider.isDarkMode
+                                      ? AppColors.darkErrorColor
+                                      : Colors.red.shade600),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -490,20 +544,30 @@ class _WishlistScreenState extends State<WishlistScreen> {
   }
 
   void _showRemoveDialog(Product product) {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: Theme.of(context).dialogBackgroundColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          title: const Text(
+          title: Text(
             'Remove from Wishlist?',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 18,
+              color: Theme.of(context).textTheme.titleLarge?.color,
+            ),
           ),
           content: Text(
             'Are you sure you want to remove "${product.name}" from your wishlist?',
-            style: TextStyle(color: Colors.grey.shade700, fontSize: 14),
+            style: TextStyle(
+              color: themeProvider.getTextSecondaryColor(context),
+              fontSize: 14,
+            ),
           ),
           actions: [
             TextButton(
@@ -511,7 +575,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
               child: Text(
                 'Cancel',
                 style: TextStyle(
-                  color: Colors.grey.shade600,
+                  color: themeProvider.getTextSecondaryColor(context),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -522,7 +586,9 @@ class _WishlistScreenState extends State<WishlistScreen> {
                 removeFromWishlist(product.id!);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
+                backgroundColor: themeProvider.isDarkMode
+                    ? AppColors.darkErrorColor
+                    : Colors.red,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:amazon_clone/common/widgets/stars.dart';
 import 'package:amazon_clone/constants/global_variables.dart';
+import 'package:amazon_clone/constants/theme.dart';
 import 'package:amazon_clone/features/account/services/wishlist_services.dart';
 import 'package:amazon_clone/features/address/screens/address_screen.dart'; // Thêm import này
 import 'package:amazon_clone/features/product_details/services/product_details_service.dart';
@@ -167,14 +168,20 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(60),
         child: AppBar(
           flexibleSpace: Container(
-            decoration: const BoxDecoration(
-              gradient: GlobalVariables.appBarGradient,
+            decoration: BoxDecoration(
+              gradient: themeProvider.getAppBarGradient(context),
             ),
+          ),
+          iconTheme: IconThemeData(
+            color: themeProvider.isDarkMode ? Colors.white : Colors.black,
           ),
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -186,38 +193,48 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   child: Material(
                     borderRadius: BorderRadius.circular(25),
                     elevation: 2,
+                    color: Theme.of(context).inputDecorationTheme.fillColor,
                     child: TextFormField(
                       onFieldSubmitted: navigateToSearchScreen,
                       decoration: InputDecoration(
                         prefixIcon: InkWell(
                           onTap: () {},
-                          child: const Padding(
-                            padding: EdgeInsets.only(left: 6),
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 6),
                             child: Icon(
                               Icons.search,
-                              color: Colors.black54,
+                              color: themeProvider.getTextSecondaryColor(
+                                context,
+                              ),
                               size: 23,
                             ),
                           ),
                         ),
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: Theme.of(
+                          context,
+                        ).inputDecorationTheme.fillColor,
                         contentPadding: const EdgeInsets.only(top: 10),
                         border: const OutlineInputBorder(
                           borderRadius: BorderRadius.all(Radius.circular(25)),
                           borderSide: BorderSide.none,
                         ),
-                        enabledBorder: const OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(25)),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(25),
+                          ),
                           borderSide: BorderSide(
-                            color: Colors.black38,
+                            color: themeProvider.isDarkMode
+                                ? AppColors.darkDividerColor
+                                : Colors.black38,
                             width: 1,
                           ),
                         ),
                         hintText: 'Search Amazon.in',
-                        hintStyle: const TextStyle(
+                        hintStyle: TextStyle(
                           fontWeight: FontWeight.w400,
                           fontSize: 17,
+                          color: themeProvider.getTextSecondaryColor(context),
                         ),
                       ),
                     ),
@@ -232,7 +249,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   onPressed: toggleWishlist,
                   icon: Icon(
                     isInWishlist ? Icons.favorite : Icons.favorite_border,
-                    color: isInWishlist ? Colors.red : Colors.white,
+                    color: isInWishlist
+                        ? Colors.red
+                        : (themeProvider.isDarkMode
+                              ? Colors.white
+                              : Colors.black54),
                     size: 28,
                   ),
                 ),
@@ -250,16 +271,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               margin: const EdgeInsets.all(16),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    spreadRadius: 1,
-                    blurRadius: 5,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                boxShadow: [themeProvider.getCardShadow(context)],
+                border: Border.all(
+                  color: themeProvider.getBorderColor(context),
+                  width: 0.5,
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -267,10 +285,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   Expanded(
                     child: Text(
                       widget.product.name,
-                      style: const TextStyle(
+                      style: themeProvider.getHeadingStyle(
+                        context,
                         fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
                       ),
                     ),
                   ),
@@ -285,14 +302,16 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.orange.withOpacity(0.1),
+                          color: themeProvider
+                              .getAmazonOrangeColor(context)
+                              .withOpacity(0.1),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
                           '${avgRating.toStringAsFixed(1)} ⭐',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: Colors.orange,
+                            color: themeProvider.getAmazonOrangeColor(context),
                           ),
                         ),
                       ),
@@ -309,14 +328,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               margin: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
-                    spreadRadius: 2,
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                boxShadow: [themeProvider.getCardShadow(context)],
+                border: Border.all(
+                  color: themeProvider.getBorderColor(context),
+                  width: 0.5,
+                ),
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
@@ -325,7 +341,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     return Builder(
                       builder: (BuildContext context) => Container(
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Theme.of(context).cardColor,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Image.network(
@@ -354,16 +370,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               margin: const EdgeInsets.symmetric(horizontal: 16),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    spreadRadius: 1,
-                    blurRadius: 5,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                boxShadow: [themeProvider.getCardShadow(context)],
+                border: Border.all(
+                  color: themeProvider.getBorderColor(context),
+                  width: 0.5,
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -375,10 +388,15 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     ),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [
-                          Colors.red.withOpacity(0.1),
-                          Colors.orange.withOpacity(0.1),
-                        ],
+                        colors: themeProvider.isDarkMode
+                            ? [
+                                Colors.red.withOpacity(0.2),
+                                Colors.orange.withOpacity(0.2),
+                              ]
+                            : [
+                                Colors.red.withOpacity(0.1),
+                                Colors.orange.withOpacity(0.1),
+                              ],
                         begin: Alignment.centerLeft,
                         end: Alignment.centerRight,
                       ),
@@ -387,9 +405,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     child: RichText(
                       text: TextSpan(
                         text: 'Deal Price: ',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
-                          color: Colors.black87,
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
                           fontWeight: FontWeight.w600,
                         ),
                         children: [
@@ -406,20 +424,16 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     'Description',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
+                    style: themeProvider.getHeadingStyle(context, fontSize: 18),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     widget.product.description,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
-                      color: Colors.black54,
+                      color: themeProvider.getTextSecondaryColor(context),
                       height: 1.5,
                     ),
                   ),
@@ -434,16 +448,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               margin: const EdgeInsets.symmetric(horizontal: 16),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    spreadRadius: 1,
-                    blurRadius: 5,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                boxShadow: [themeProvider.getCardShadow(context)],
+                border: Border.all(
+                  color: themeProvider.getBorderColor(context),
+                  width: 0.5,
+                ),
               ),
               child: Column(
                 children: [
@@ -543,7 +554,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         decoration: BoxDecoration(
                           color: isInWishlist
                               ? Colors.red
-                              : Colors.grey.shade200,
+                              : (themeProvider.isDarkMode
+                                    ? themeProvider.getSurfaceVariantColor(
+                                        context,
+                                      )
+                                    : Colors.grey.shade200),
                           borderRadius: BorderRadius.circular(25),
                           boxShadow: [
                             BoxShadow(
@@ -563,7 +578,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                 : Icons.favorite_border,
                             color: isInWishlist
                                 ? Colors.white
-                                : Colors.grey.shade600,
+                                : themeProvider.getTextSecondaryColor(context),
                             size: 24,
                           ),
                         ),
@@ -581,34 +596,30 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               margin: const EdgeInsets.symmetric(horizontal: 16),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    spreadRadius: 1,
-                    blurRadius: 5,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                boxShadow: [themeProvider.getCardShadow(context)],
+                border: Border.all(
+                  color: themeProvider.getBorderColor(context),
+                  width: 0.5,
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.star_rate,
-                        color: Colors.orange,
+                        color: themeProvider.getAmazonOrangeColor(context),
                         size: 28,
                       ),
                       const SizedBox(width: 8),
-                      const Text(
+                      Text(
                         'Rate This Product',
-                        style: TextStyle(
+                        style: themeProvider.getHeadingStyle(
+                          context,
                           fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
                         ),
                       ),
                     ],
@@ -623,10 +634,14 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       itemCount: 5,
                       itemSize: 35,
                       glow: true,
-                      glowColor: Colors.orange.withOpacity(0.5),
+                      glowColor: themeProvider
+                          .getAmazonOrangeColor(context)
+                          .withOpacity(0.5),
                       itemPadding: const EdgeInsets.symmetric(horizontal: 6.0),
-                      itemBuilder: (context, _) =>
-                          const Icon(Icons.star, color: Colors.orange),
+                      itemBuilder: (context, _) => Icon(
+                        Icons.star,
+                        color: themeProvider.getAmazonOrangeColor(context),
+                      ),
                       onRatingUpdate: (rating) {
                         productDetailsService.rateProduct(
                           context: context,
@@ -645,14 +660,16 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.orange.withOpacity(0.1),
+                          color: themeProvider
+                              .getAmazonOrangeColor(context)
+                              .withOpacity(0.1),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
                           'Your rating: ${myRating.toStringAsFixed(1)} ⭐',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.w600,
-                            color: Colors.orange,
+                            color: themeProvider.getAmazonOrangeColor(context),
                           ),
                         ),
                       ),

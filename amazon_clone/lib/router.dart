@@ -128,10 +128,10 @@ Route<dynamic> generateRoute(RouteSettings routeSetting) {
         settings: routeSetting,
         builder: (_) => const AllOrdersScreen(),
       );
-    case LiveStreamHomePage.routeName:
+    case LiveStreamShopPage.routeName:
       return MaterialPageRoute(
         settings: routeSetting,
-        builder: (_) => const LiveStreamHomePage(),
+        builder: (_) => const LiveStreamShopPage(),
       );
     default:
       return MaterialPageRoute(

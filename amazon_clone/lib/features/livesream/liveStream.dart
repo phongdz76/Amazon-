@@ -1,3 +1,4 @@
+// Updated LiveStreamShopPage that can be used directly in routing
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'dart:async';
@@ -7,293 +8,15 @@ import 'package:amazon_clone/features/home/services/home_services.dart';
 import 'package:amazon_clone/features/product_details/services/product_details_service.dart';
 import 'package:amazon_clone/common/widgets/loader.dart';
 import 'package:amazon_clone/common/widgets/stars.dart';
-
-// Global cameras variable for compatibility with Windows approach
-List<CameraDescription> _globalCameras = [];
-
-class LiveStreamHomePage extends StatelessWidget {
-  static const String routeName = '/live-stream';
-  const LiveStreamHomePage({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<List<CameraDescription>>(
-      future: _initializeGlobalCameras(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return _buildLoadingScreen();
-        }
-
-        if (snapshot.hasError) {
-          return _buildErrorScreen(context, snapshot.error.toString());
-        }
-
-        final cameras = snapshot.data ?? [];
-        return _buildMainScreen(context, cameras);
-      },
-    );
-  }
-
-  Future<List<CameraDescription>> _initializeGlobalCameras() async {
-    try {
-      final camerasList = await availableCameras();
-
-      if (camerasList.isEmpty) {
-        debugPrint('No physical cameras found, creating virtual camera');
-        _globalCameras = [
-          const CameraDescription(
-            name: 'Virtual Camera (Máy ảo)',
-            lensDirection: CameraLensDirection.back,
-            sensorOrientation: 0,
-          ),
-        ];
-      } else {
-        _globalCameras = camerasList;
-      }
-    } catch (e) {
-      debugPrint('Camera initialization error: $e');
-      debugPrint('Creating fallback virtual camera');
-      _globalCameras = [
-        const CameraDescription(
-          name: 'Virtual Camera (Fallback)',
-          lensDirection: CameraLensDirection.back,
-          sensorOrientation: 0,
-        ),
-      ];
-    }
-
-    return _globalCameras;
-  }
-
-  Widget _buildLoadingScreen() {
-    return Scaffold(
-      backgroundColor: Colors.grey[100],
-      appBar: AppBar(
-        title: const Text('Live Stream Shop'),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Đang khởi tạo camera...'),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildErrorScreen(BuildContext context, String error) {
-    return Scaffold(
-      backgroundColor: Colors.grey[100],
-      appBar: AppBar(
-        title: const Text('Live Stream Shop'),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error, size: 64, color: Colors.red),
-            const SizedBox(height: 16),
-            Text('Lỗi khởi tạo camera: $error'),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushReplacementNamed(context, routeName);
-              },
-              child: const Text('Thử lại'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMainScreen(
-    BuildContext context,
-    List<CameraDescription> cameras,
-  ) {
-    final isVirtualCamera =
-        cameras.isNotEmpty && cameras.first.name.contains('Virtual');
-
-    return Scaffold(
-      backgroundColor: Colors.grey[100],
-      appBar: AppBar(
-        title: const Text('Live Stream Shop'),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: isVirtualCamera ? Colors.orange : Colors.red,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: (isVirtualCamera ? Colors.orange : Colors.red)
-                        .withOpacity(0.3),
-                    blurRadius: 20,
-                    spreadRadius: 5,
-                  ),
-                ],
-              ),
-              child: Icon(
-                isVirtualCamera ? Icons.computer : Icons.videocam,
-                size: 60,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 30),
-            Text(
-              isVirtualCamera ? 'Live Stream (Demo Mode)' : 'Start Live Stream',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              isVirtualCamera
-                  ? 'Running on virtual machine - Simulated camera'
-                  : 'Livestream and sell products online',
-              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-            ),
-            if (isVirtualCamera) ...[
-              const SizedBox(height: 10),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.orange.withOpacity(0.3)),
-                ),
-                child: const Text(
-                  '⚠️ No physical camera found',
-                  style: TextStyle(color: Colors.orange, fontSize: 14),
-                ),
-              ),
-            ],
-            const SizedBox(height: 40),
-            Container(
-              width: double.infinity,
-              margin: const EdgeInsets.symmetric(horizontal: 40),
-              child: ElevatedButton(
-                onPressed: () => _startLiveStream(context, cameras),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isVirtualCamera ? Colors.orange : Colors.red,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  elevation: 8,
-                  shadowColor: (isVirtualCamera ? Colors.orange : Colors.red)
-                      .withOpacity(0.3),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.play_arrow, size: 28),
-                    const SizedBox(width: 12),
-                    Text(
-                      isVirtualCamera
-                          ? 'Bắt đầu Demo Stream'
-                          : 'Start Live Stream',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _startLiveStream(BuildContext context, List<CameraDescription> cameras) {
-    if (cameras.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Không tìm thấy camera!'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    final isVirtualCamera = cameras.first.name.contains('Virtual');
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return Center(
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(
-                  color: isVirtualCamera ? Colors.orange : Colors.red,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  isVirtualCamera
-                      ? 'Starting Demo Stream...'
-                      : 'Starting Live Stream...',
-                  style: const TextStyle(fontSize: 16),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-
-    Future.delayed(const Duration(milliseconds: 1500), () {
-      if (!context.mounted) return;
-      Navigator.of(context).pop();
-      if (!context.mounted) return;
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => LiveStreamShopPage(cameras: cameras),
-        ),
-      );
-    });
-  }
-}
+// Import WebSocket service
+import 'websocket_service.dart';
 
 class LiveStreamShopPage extends StatefulWidget {
-  final List<CameraDescription> cameras;
+  static const String routeName = '/live-stream-shop';
 
-  const LiveStreamShopPage({super.key, required this.cameras});
+  final List<CameraDescription>? cameras;
+
+  const LiveStreamShopPage({super.key, this.cameras});
 
   @override
   State<LiveStreamShopPage> createState() => _LiveStreamShopPageState();
@@ -302,35 +25,154 @@ class LiveStreamShopPage extends StatefulWidget {
 class _LiveStreamShopPageState extends State<LiveStreamShopPage> {
   CameraController? _controller;
   Future<void>? _initializeControllerFuture;
-  late StreamController<Duration> _durationController;
-  late StreamController<List<Product>> _productController;
   Timer? _timer;
   Duration _currentDuration = Duration.zero;
-  int _viewerCount = 5;
+  int _viewerCount = 0;
   bool _isCameraInitialized = false;
   bool _isVirtualCamera = false;
+  bool _isStreamActive = false;
+
+  // Camera management
+  List<CameraDescription> _cameras = [];
+  bool _isLoadingCameras = false;
+
+  // WebSocket service
+  final WebSocketService _webSocketService = WebSocketService.instance;
+  StreamSubscription<StreamState>? _streamSubscription;
 
   // Real products from API
   List<Product> _products = [];
   bool _isLoadingProducts = true;
   final HomeServices _homeServices = HomeServices();
-
-  // Add ProductDetailsService for cart functionality
   final ProductDetailsService _productDetailsService = ProductDetailsService();
 
   @override
   void initState() {
     super.initState();
-    _durationController = StreamController<Duration>();
-    _productController = StreamController<List<Product>>();
-    _isVirtualCamera =
-        widget.cameras.isNotEmpty &&
-        widget.cameras.first.name.contains('Virtual');
-    _initCamera();
-    _fetchProducts(); // Fetch real products
+    _initializeCamerasAndSetup();
   }
 
-  // Fetch real products from API
+  Future<void> _initializeCamerasAndSetup() async {
+    // If cameras were passed, use them; otherwise, try to get them
+    if (widget.cameras != null) {
+      _cameras = widget.cameras!;
+    } else {
+      setState(() => _isLoadingCameras = true);
+      try {
+        _cameras = await availableCameras();
+      } catch (e) {
+        debugPrint('Error getting cameras: $e');
+        _cameras = [];
+      }
+      setState(() => _isLoadingCameras = false);
+    }
+
+    _isVirtualCamera =
+        _cameras.isEmpty ||
+        (_cameras.isNotEmpty && _cameras.first.name.contains('Virtual'));
+
+    _initWebSocket();
+    _initCamera();
+    _fetchProducts();
+  }
+
+  Future<void> _initWebSocket() async {
+    debugPrint('🔗 Initializing WebSocket connection...');
+
+    // Change this IP to your Windows machine IP
+    final connected = await _webSocketService.connect(
+      serverUrl: 'http://192.168.1.100:3000', // Change this IP
+    );
+
+    if (connected) {
+      debugPrint('✅ WebSocket connected successfully');
+
+      // Join as admin
+      _webSocketService.joinAsAdmin(adminName: 'Admin');
+
+      // Listen to stream state changes
+      _streamSubscription = _webSocketService.stateStream.listen((state) {
+        if (!mounted) return;
+
+        setState(() {
+          _viewerCount = state.viewers;
+          _isStreamActive = state.isActive;
+        });
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.wifi, color: Colors.white, size: 16),
+                SizedBox(width: 8),
+                Text('Kết nối WebSocket thành công!'),
+              ],
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } else {
+      debugPrint('❌ WebSocket connection failed');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.wifi_off, color: Colors.white, size: 16),
+                SizedBox(width: 8),
+                Text('Không thể kết nối WebSocket server!'),
+              ],
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _initCamera() async {
+    if (_isVirtualCamera || _cameras.isEmpty) {
+      setState(() => _isCameraInitialized = false);
+      return;
+    }
+
+    try {
+      _controller = CameraController(
+        _cameras.first,
+        ResolutionPreset.high,
+        enableAudio: true,
+        imageFormatGroup: ImageFormatGroup.yuv420,
+      );
+
+      _initializeControllerFuture = _controller!
+          .initialize()
+          .then((_) {
+            if (!mounted) return;
+            setState(() => _isCameraInitialized = true);
+          })
+          .catchError((e) {
+            debugPrint('Camera initialization error: $e');
+            if (mounted) {
+              setState(() {
+                _isVirtualCamera = true;
+                _isCameraInitialized = false;
+              });
+            }
+          });
+    } catch (e) {
+      debugPrint('Camera controller creation error: $e');
+      if (mounted) {
+        setState(() {
+          _isVirtualCamera = true;
+          _isCameraInitialized = false;
+        });
+      }
+    }
+  }
+
   Future<void> _fetchProducts() async {
     try {
       final fetchedProducts = await _homeServices.fetchAllProducts(
@@ -342,11 +184,6 @@ class _LiveStreamShopPageState extends State<LiveStreamShopPage> {
           _products = fetchedProducts;
           _isLoadingProducts = false;
         });
-
-        // Update stream with real products
-        if (!_productController.isClosed) {
-          _productController.add(_products);
-        }
       }
     } catch (e) {
       debugPrint('Error fetching products for live stream: $e');
@@ -356,7 +193,6 @@ class _LiveStreamShopPageState extends State<LiveStreamShopPage> {
           _isLoadingProducts = false;
         });
 
-        // Show error message
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Unable to load products. Please try again!'),
@@ -367,63 +203,55 @@ class _LiveStreamShopPageState extends State<LiveStreamShopPage> {
     }
   }
 
-  Future<void> _initCamera() async {
-    if (_isVirtualCamera) {
-      setState(() => _isCameraInitialized = false);
-      _startLiveStream();
+  void _startLiveStream() {
+    if (!_webSocketService.isConnected) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Chưa kết nối WebSocket server!'),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
 
-    try {
-      _controller = CameraController(
-        widget.cameras.first,
-        ResolutionPreset.high,
-        enableAudio: true,
-        imageFormatGroup: ImageFormatGroup.yuv420,
+    if (_products.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Chưa có sản phẩm để livestream!'),
+          backgroundColor: Colors.orange,
+        ),
       );
-
-      _initializeControllerFuture = _controller!
-          .initialize()
-          .then((_) {
-            if (!mounted) return;
-            setState(() => _isCameraInitialized = true);
-            _startLiveStream();
-          })
-          .catchError((e) {
-            debugPrint('Camera initialization error: $e');
-            if (mounted) {
-              setState(() {
-                _isVirtualCamera = true;
-                _isCameraInitialized = false;
-              });
-              _startLiveStream();
-            }
-          });
-    } catch (e) {
-      debugPrint('Camera controller creation error: $e');
-      if (mounted) {
-        setState(() {
-          _isVirtualCamera = true;
-          _isCameraInitialized = false;
-        });
-        _startLiveStream();
-      }
+      return;
     }
-  }
 
-  void _startLiveStream() {
-    if (!mounted) return;
+    debugPrint('🔴 Admin starting livestream...');
+
+    // Start stream via WebSocket
+    _webSocketService.startStream(_products);
+
+    setState(() {
+      _isStreamActive = true;
+    });
+
+    // Start duration timer
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      setState(() {
+        _currentDuration = Duration(seconds: _currentDuration.inSeconds + 1);
+      });
+    });
 
     String platformMessage = '';
     if (_isVirtualCamera) {
-      platformMessage = ' (Chế độ Demo - Máy ảo)';
+      platformMessage = ' (Demo Mode - Virtual Machine)';
     } else {
       platformMessage = Platform.isWindows
-          ? ' (Windows)'
+          ? ' (Windows Admin)'
           : Platform.isAndroid
-          ? ' (Android)'
-          : Platform.isIOS
-          ? ' (iOS)'
+          ? ' (Android Admin)'
           : '';
     }
 
@@ -437,32 +265,56 @@ class _LiveStreamShopPageState extends State<LiveStreamShopPage> {
               size: 16,
             ),
             const SizedBox(width: 8),
-            Text('Live Stream has started!$platformMessage'),
+            Text('Live Stream đã bắt đầu!$platformMessage'),
           ],
         ),
         backgroundColor: Colors.green,
         duration: const Duration(seconds: 3),
       ),
     );
+  }
 
-    // Start timer for stream duration and viewer count
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!mounted) {
-        timer.cancel();
-        return;
-      }
+  void _endLiveStream() {
+    debugPrint('⚫ Admin ending livestream...');
 
-      _currentDuration = Duration(seconds: _currentDuration.inSeconds + 1);
-      if (!_durationController.isClosed) {
-        _durationController.add(_currentDuration);
-      }
+    // End stream via WebSocket
+    _webSocketService.endStream();
 
-      if (timer.tick % 5 == 0) {
-        setState(() {
-          _viewerCount += (timer.tick % 2 == 0) ? 1 : -1;
-        });
-      }
+    setState(() {
+      _isStreamActive = false;
+      _currentDuration = Duration.zero;
     });
+
+    _timer?.cancel();
+    _timer = null;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Row(
+          children: [
+            Icon(Icons.tv_off, color: Colors.white, size: 16),
+            SizedBox(width: 8),
+            Text('Live Stream đã kết thúc'),
+          ],
+        ),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+
+  void _updateStreamProducts() {
+    if (_isStreamActive && _webSocketService.isConnected) {
+      debugPrint('📦 Admin updating stream products...');
+      _webSocketService.updateProducts(_products);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Đã cập nhật sản phẩm cho stream!'),
+          backgroundColor: Colors.blue,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   String _formatDuration(Duration duration) {
@@ -484,98 +336,6 @@ class _LiveStreamShopPageState extends State<LiveStreamShopPage> {
     return totalRating / product.rating!.length;
   }
 
-  // Updated _addToCart method to actually add to cart
-  void _addToCart(Product product) {
-    // Show loading indicator
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return const Center(child: CircularProgressIndicator());
-      },
-    );
-
-    try {
-      // Add product to cart using ProductDetailsService
-      _productDetailsService.addToCart(context: context, product: product);
-
-      // Close loading dialog
-      Future.delayed(const Duration(milliseconds: 500), () {
-        if (mounted) {
-          Navigator.of(context).pop();
-        }
-
-        // Show success message
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const Icon(
-                    Icons.shopping_cart,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Đã thêm "${product.name}" vào giỏ hàng',
-                      style: const TextStyle(fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                ],
-              ),
-              backgroundColor: Colors.green,
-              duration: const Duration(seconds: 3),
-              action: SnackBarAction(
-                label: 'Xem giỏ hàng',
-                textColor: Colors.white,
-                onPressed: () {
-                  // Navigate to cart screen
-                  Navigator.pushNamed(context, '/cart');
-                },
-              ),
-            ),
-          );
-        }
-      });
-    } catch (e) {
-      // Close loading dialog if open
-      Future.delayed(const Duration(milliseconds: 100), () {
-        if (mounted) {
-          Navigator.of(context).pop();
-        }
-
-        // Show error message
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const Icon(Icons.error, color: Colors.white, size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Error adding product to cart: ${e.toString()}',
-                      style: const TextStyle(fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                ],
-              ),
-              backgroundColor: Colors.red,
-              duration: const Duration(seconds: 3),
-              action: SnackBarAction(
-                label: 'Retry',
-                textColor: Colors.white,
-                onPressed: () => _addToCart(product),
-              ),
-            ),
-          );
-        }
-      });
-    }
-  }
-
   Widget _buildVirtualCameraView() {
     return Container(
       width: double.infinity,
@@ -585,59 +345,105 @@ class _LiveStreamShopPageState extends State<LiveStreamShopPage> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.orange.withOpacity(0.3),
+            (_isStreamActive ? Colors.red : Colors.orange).withOpacity(0.3),
             Colors.blue.withOpacity(0.3),
             Colors.purple.withOpacity(0.3),
           ],
         ),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Stack(
         children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.7),
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Column(
-              children: [
-                const Icon(Icons.computer, size: 80, color: Colors.orange),
-                const SizedBox(height: 16),
-                const Text(
-                  'CAMERA MÔ PHỎNG',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 2,
+          // Main content
+          Center(
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.7),
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    _isStreamActive ? Icons.videocam : Icons.computer,
+                    size: 80,
+                    color: _isStreamActive ? Colors.red : Colors.orange,
                   ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Chế độ Demo cho máy ảo',
-                  style: TextStyle(color: Colors.orange, fontSize: 14),
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.orange,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Text(
-                    'DEMO MODE',
+                  const SizedBox(height: 16),
+                  Text(
+                    _isStreamActive ? 'ĐANG LIVESTREAM' : 'CAMERA MÔ PHỎNG',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 12,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _isStreamActive
+                        ? 'Admin đang livestream'
+                        : 'Chế độ Demo cho máy ảo',
+                    style: TextStyle(
+                      color: _isStreamActive ? Colors.red : Colors.orange,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _isStreamActive ? Colors.red : Colors.orange,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      _isStreamActive ? 'LIVE' : 'DEMO MODE',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Connection status
+          Positioned(
+            top: 20,
+            right: 20,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: _webSocketService.isConnected
+                    ? Colors.green
+                    : Colors.red,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    _webSocketService.isConnected ? Icons.wifi : Icons.wifi_off,
+                    color: Colors.white,
+                    size: 12,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    _webSocketService.isConnected ? 'Connected' : 'Offline',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -720,10 +526,10 @@ class _LiveStreamShopPageState extends State<LiveStreamShopPage> {
                   Row(
                     children: [
                       const Text(
-                        '\$',
+                        '₫',
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.orange,
+                          color: Colors.red,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -732,7 +538,7 @@ class _LiveStreamShopPageState extends State<LiveStreamShopPage> {
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.orange,
+                          color: Colors.red,
                         ),
                       ),
                     ],
@@ -741,8 +547,8 @@ class _LiveStreamShopPageState extends State<LiveStreamShopPage> {
                   // Stock Status
                   Text(
                     product.quantity > 0
-                        ? 'In Stock (${product.quantity.toInt()})'
-                        : 'Out of Stock',
+                        ? 'Còn hàng (${product.quantity.toInt()})'
+                        : 'Hết hàng',
                     style: TextStyle(
                       fontSize: 11,
                       color: product.quantity > 0
@@ -755,22 +561,22 @@ class _LiveStreamShopPageState extends State<LiveStreamShopPage> {
               ),
             ),
 
-            // Add to Cart Button - Updated with loading state
-            ElevatedButton(
-              onPressed: product.quantity > 0
-                  ? () => _addToCart(product)
-                  : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _isVirtualCamera ? Colors.orange : Colors.red,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                minimumSize: const Size(0, 32),
-                disabledBackgroundColor: Colors.grey.shade400,
+            // Admin indicator
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.blue.withOpacity(0.3)),
               ),
-              child: const Text('Thêm vào giỏ', style: TextStyle(fontSize: 12)),
+              child: const Text(
+                'ADMIN',
+                style: TextStyle(
+                  color: Colors.blue,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         ),
@@ -781,70 +587,121 @@ class _LiveStreamShopPageState extends State<LiveStreamShopPage> {
   @override
   void dispose() {
     _timer?.cancel();
-    _durationController.close();
-    _productController.close();
+    _streamSubscription?.cancel();
     _controller?.dispose();
+
+    // End stream when admin leaves
+    if (_isStreamActive) {
+      _webSocketService.endStream();
+    }
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoadingCameras) {
+      return Scaffold(
+        backgroundColor: Colors.black,
+        body: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(color: Colors.white),
+              SizedBox(height: 16),
+              Text(
+                'Initializing cameras...',
+                style: TextStyle(color: Colors.white),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: StreamBuilder<Duration>(
-          stream: _durationController.stream,
-          initialData: Duration.zero,
-          builder: (context, snapshot) {
-            return Row(
-              children: [
-                Icon(
-                  Icons.fiber_manual_record,
-                  color: _isVirtualCamera ? Colors.orange : Colors.red,
-                  size: 20,
+        title: Row(
+          children: [
+            Icon(
+              Icons.fiber_manual_record,
+              color: _isStreamActive
+                  ? (_isVirtualCamera ? Colors.orange : Colors.red)
+                  : Colors.grey,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              _formatDuration(_currentDuration),
+              style: const TextStyle(color: Colors.white),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: _isStreamActive
+                    ? (_isVirtualCamera ? Colors.orange : Colors.red)
+                          .withOpacity(0.2)
+                    : Colors.grey.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: _isStreamActive
+                      ? (_isVirtualCamera ? Colors.orange : Colors.red)
+                      : Colors.grey,
+                  width: 1,
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  _formatDuration(snapshot.data!),
-                  style: const TextStyle(color: Colors.white),
+              ),
+              child: Text(
+                _isStreamActive ? 'LIVE' : 'OFFLINE',
+                style: TextStyle(
+                  color: _isStreamActive
+                      ? (_isVirtualCamera ? Colors.orange : Colors.red)
+                      : Colors.grey,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
                 ),
-                if (_isVirtualCamera) ...[
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.orange.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.orange, width: 1),
-                    ),
-                    child: const Text(
-                      'DEMO',
-                      style: TextStyle(
-                        color: Colors.orange,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-                const Spacer(),
-                const Icon(Icons.people, color: Colors.white, size: 20),
-                const SizedBox(width: 4),
-                Text(
-                  '$_viewerCount',
-                  style: const TextStyle(color: Colors.white),
-                ),
-              ],
-            );
-          },
+              ),
+            ),
+            const Spacer(),
+            const Icon(Icons.people, color: Colors.white, size: 20),
+            const SizedBox(width: 4),
+            Text('$_viewerCount', style: const TextStyle(color: Colors.white)),
+          ],
         ),
         backgroundColor: Colors.black.withOpacity(0.5),
         elevation: 0,
         actions: [
-          if (!_isVirtualCamera && widget.cameras.length > 1)
+          // WebSocket connection indicator
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: _webSocketService.isConnected ? Colors.green : Colors.red,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  _webSocketService.isConnected ? Icons.wifi : Icons.wifi_off,
+                  color: Colors.white,
+                  size: 12,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  _webSocketService.isConnected ? 'WS' : 'OFF',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          if (!_isVirtualCamera && _cameras.length > 1)
             IconButton(
               icon: const Icon(Icons.switch_camera, color: Colors.white),
               onPressed: () {
@@ -854,9 +711,9 @@ class _LiveStreamShopPageState extends State<LiveStreamShopPage> {
                     ? CameraLensDirection.front
                     : CameraLensDirection.back;
 
-                final camera = widget.cameras.firstWhere(
+                final camera = _cameras.firstWhere(
                   (c) => c.lensDirection == newLensDirection,
-                  orElse: () => widget.cameras.first,
+                  orElse: () => _cameras.first,
                 );
 
                 _controller = CameraController(
@@ -878,6 +735,7 @@ class _LiveStreamShopPageState extends State<LiveStreamShopPage> {
                 });
               },
             ),
+
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.white),
             onPressed: () {
@@ -887,13 +745,7 @@ class _LiveStreamShopPageState extends State<LiveStreamShopPage> {
               _fetchProducts();
             },
           ),
-          // Add cart icon to show cart count (optional)
-          IconButton(
-            icon: const Icon(Icons.shopping_cart, color: Colors.white),
-            onPressed: () {
-              Navigator.pushNamed(context, '/cart');
-            },
-          ),
+
           IconButton(
             icon: const Icon(Icons.close, color: Colors.white),
             onPressed: () => Navigator.of(context).pop(),
@@ -902,6 +754,7 @@ class _LiveStreamShopPageState extends State<LiveStreamShopPage> {
       ),
       body: Column(
         children: [
+          // Camera/Stream View
           Expanded(
             flex: 3,
             child: _isVirtualCamera
@@ -911,7 +764,45 @@ class _LiveStreamShopPageState extends State<LiveStreamShopPage> {
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.done) {
                         if (_isCameraInitialized && _controller != null) {
-                          return CameraPreview(_controller!);
+                          return Stack(
+                            children: [
+                              CameraPreview(_controller!),
+                              if (_isStreamActive)
+                                Positioned(
+                                  top: 20,
+                                  left: 20,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.fiber_manual_record,
+                                          color: Colors.white,
+                                          size: 12,
+                                        ),
+                                        SizedBox(width: 4),
+                                        Text(
+                                          'LIVE',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          );
                         } else {
                           return const Center(
                             child: Text(
@@ -958,95 +849,160 @@ class _LiveStreamShopPageState extends State<LiveStreamShopPage> {
                     },
                   ),
           ),
+
+          // Control Panel & Products
           Expanded(
             flex: 2,
             child: Container(
               color: Colors.white,
-              padding: const EdgeInsets.all(16),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      const Text(
-                        'Products for Sale',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                  // Control buttons
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      border: Border(
+                        bottom: BorderSide(color: Colors.grey.shade300),
                       ),
-                      if (_isVirtualCamera) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.orange.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: Colors.orange.withOpacity(0.3),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: _isStreamActive
+                                ? null
+                                : _startLiveStream,
+                            icon: const Icon(Icons.play_arrow),
+                            label: const Text('Bắt đầu Live'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
                             ),
                           ),
-                          child: const Text(
-                            'Demo',
-                            style: TextStyle(
-                              color: Colors.orange,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: _isStreamActive ? _endLiveStream : null,
+                            icon: const Icon(Icons.stop),
+                            label: const Text('Kết thúc Live'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
                             ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        ElevatedButton.icon(
+                          onPressed: _isStreamActive
+                              ? _updateStreamProducts
+                              : null,
+                          icon: const Icon(Icons.sync),
+                          label: const Text('Cập nhật'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
                         ),
                       ],
-                      const Spacer(),
-                      if (!_isLoadingProducts)
-                        Text(
-                          '${_products.length} products',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey.shade600,
-                          ),
-                        ),
-                    ],
+                    ),
                   ),
-                  const SizedBox(height: 8),
+
+                  // Products list
                   Expanded(
-                    child: _isLoadingProducts
-                        ? const Center(child: Loader())
-                        : _products.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.shopping_bag_outlined,
-                                  size: 48,
-                                  color: Colors.grey.shade400,
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Text(
+                                'Sản phẩm livestream',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'No products available',
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: Colors.blue.withOpacity(0.3),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'ADMIN VIEW',
                                   style: TextStyle(
-                                    fontSize: 16,
+                                    color: Colors.blue,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              const Spacer(),
+                              if (!_isLoadingProducts)
+                                Text(
+                                  '${_products.length} sản phẩm',
+                                  style: TextStyle(
+                                    fontSize: 12,
                                     color: Colors.grey.shade600,
                                   ),
                                 ),
-                                const SizedBox(height: 8),
-                                ElevatedButton(
-                                  onPressed: _fetchProducts,
-                                  child: const Text('Try Again'),
-                                ),
-                              ],
-                            ),
-                          )
-                        : ListView.builder(
-                            itemCount: _products.length,
-                            itemBuilder: (context, index) {
-                              final product = _products[index];
-                              return _buildProductItem(product);
-                            },
+                            ],
                           ),
+                          const SizedBox(height: 8),
+                          Expanded(
+                            child: _isLoadingProducts
+                                ? const Center(child: Loader())
+                                : _products.isEmpty
+                                ? Center(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.shopping_bag_outlined,
+                                          size: 48,
+                                          color: Colors.grey.shade400,
+                                        ),
+                                        const SizedBox(height: 16),
+                                        Text(
+                                          'Chưa có sản phẩm',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.grey.shade600,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        ElevatedButton(
+                                          onPressed: _fetchProducts,
+                                          child: const Text('Tải lại'),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                : ListView.builder(
+                                    itemCount: _products.length,
+                                    itemBuilder: (context, index) {
+                                      final product = _products[index];
+                                      return _buildProductItem(product);
+                                    },
+                                  ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),

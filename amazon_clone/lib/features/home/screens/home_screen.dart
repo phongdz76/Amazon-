@@ -1,4 +1,4 @@
-import 'package:amazon_clone/constants/global_variables.dart';
+import 'package:amazon_clone/constants/theme.dart';
 import 'package:amazon_clone/features/home/widgets/address_box.dart';
 import 'package:amazon_clone/features/home/widgets/carousel_image.dart';
 import 'package:amazon_clone/features/home/widgets/deal_of_day.dart';
@@ -6,6 +6,7 @@ import 'package:amazon_clone/features/home/widgets/product_list.dart';
 import 'package:amazon_clone/features/home/widgets/top_categories.dart';
 import 'package:amazon_clone/features/search/screens/search_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   static const String routeName = '/home';
@@ -37,13 +38,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(70),
         child: AppBar(
           flexibleSpace: Container(
-            decoration: const BoxDecoration(
-              gradient: GlobalVariables.appBarGradient,
+            decoration: BoxDecoration(
+              gradient: themeProvider.getAppBarGradient(context),
             ),
           ),
           title: Row(
@@ -56,7 +60,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Material(
                     borderRadius: BorderRadius.circular(10),
                     elevation: 2,
-                    shadowColor: Colors.black26,
+                    shadowColor: themeProvider.isDarkMode
+                        ? Colors.black54
+                        : Colors.black26,
+                    color: Theme.of(context).inputDecorationTheme.fillColor,
                     child: Focus(
                       onFocusChange: (hasFocus) {
                         setState(() {
@@ -66,6 +73,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: TextFormField(
                         controller: _searchController,
                         onFieldSubmitted: navigateToSearchScreen,
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyMedium?.color,
+                        ),
                         decoration: InputDecoration(
                           prefixIcon: InkWell(
                             onTap: () {
@@ -76,8 +86,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: Icon(
                                 Icons.search,
                                 color: _isSearchFocused
-                                    ? GlobalVariables.secondaryColor
-                                    : Colors.black54,
+                                    ? Theme.of(context).primaryColor
+                                    : themeProvider.getTextSecondaryColor(
+                                        context,
+                                      ),
                                 size: 24,
                               ),
                             ),
@@ -88,15 +100,19 @@ class _HomeScreenState extends State<HomeScreen> {
                                     _searchController.clear();
                                     setState(() {});
                                   },
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.clear,
-                                    color: Colors.black54,
+                                    color: themeProvider.getTextSecondaryColor(
+                                      context,
+                                    ),
                                     size: 20,
                                   ),
                                 )
                               : null,
                           filled: true,
-                          fillColor: Colors.white,
+                          fillColor: Theme.of(
+                            context,
+                          ).inputDecorationTheme.fillColor,
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 15,
                             vertical: 12,
@@ -107,23 +123,23 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(
-                              color: Colors.black12,
+                            borderSide: BorderSide(
+                              color: themeProvider.getBorderColor(context),
                               width: 1,
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(
-                              color: GlobalVariables.secondaryColor,
+                            borderSide: BorderSide(
+                              color: Theme.of(context).primaryColor,
                               width: 2,
                             ),
                           ),
                           hintText: 'Search products, brands & more...',
-                          hintStyle: const TextStyle(
+                          hintStyle: TextStyle(
                             fontWeight: FontWeight.w400,
                             fontSize: 16,
-                            color: Colors.black54,
+                            color: themeProvider.getTextSecondaryColor(context),
                           ),
                         ),
                         onChanged: (value) {
@@ -137,14 +153,22 @@ class _HomeScreenState extends State<HomeScreen> {
               Container(
                 margin: const EdgeInsets.only(right: 10),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color:
+                      (themeProvider.isDarkMode ? Colors.black : Colors.white)
+                          .withOpacity(0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: IconButton(
                   onPressed: () {
                     // TODO: Implement voice search
                   },
-                  icon: const Icon(Icons.mic, color: Colors.white, size: 24),
+                  icon: Icon(
+                    Icons.mic,
+                    color: themeProvider.isDarkMode
+                        ? Colors.white
+                        : Colors.white,
+                    size: 24,
+                  ),
                 ),
               ),
             ],

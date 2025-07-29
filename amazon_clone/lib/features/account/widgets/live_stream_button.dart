@@ -10,7 +10,7 @@ class LiveStreamButton extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       child: ElevatedButton(
         onPressed: () {
-          Navigator.pushNamed(context, LiveStreamHomePage.routeName);
+          Navigator.pushNamed(context, LiveStreamShopPage.routeName);
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.red,

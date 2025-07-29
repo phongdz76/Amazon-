@@ -67,7 +67,6 @@ class AccountScreen extends StatelessWidget {
                 const SizedBox(height: 10),
                 const ThemeSettingTile(),
                 const SizedBox(height: 10),
-                const LiveStreamButton(),
                 const SizedBox(height: 20),
                 const Orders(),
                 const SizedBox(

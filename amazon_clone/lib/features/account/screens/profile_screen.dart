@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:amazon_clone/constants/global_variables.dart';
+import 'package:amazon_clone/constants/theme.dart';
 import 'package:amazon_clone/features/account/services/account_services.dart';
 import 'package:amazon_clone/providers/user_provider.dart';
 import 'package:flutter/material.dart';
@@ -231,29 +231,125 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required ThemeProvider themeProvider,
+    bool enabled = true,
+    TextInputType keyboardType = TextInputType.text,
+    int maxLines = 1,
+    String? Function(String?)? validator,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: TextFormField(
+        controller: controller,
+        enabled: enabled,
+        keyboardType: keyboardType,
+        maxLines: maxLines,
+        validator: validator,
+        style: TextStyle(
+          color: Theme.of(context).textTheme.bodyLarge?.color,
+          fontSize: 16,
+        ),
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: hint,
+          labelStyle: TextStyle(
+            color: themeProvider.getTextSecondaryColor(context),
+            fontSize: 16,
+          ),
+          hintStyle: TextStyle(
+            color: themeProvider.getTextTertiaryColor(context),
+            fontSize: 16,
+          ),
+          filled: true,
+          fillColor: enabled 
+              ? themeProvider.getSurfaceVariantColor(context)
+              : themeProvider.getSurfaceVariantColor(context).withOpacity(0.5),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: themeProvider.getBorderColor(context),
+              width: 1,
+            ),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: themeProvider.getBorderColor(context),
+              width: 1,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: Theme.of(context).colorScheme.primary,
+              width: 2,
+            ),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: themeProvider.getErrorColor(context),
+              width: 1,
+            ),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: themeProvider.getErrorColor(context),
+              width: 2,
+            ),
+          ),
+          disabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: themeProvider.getTextTertiaryColor(context),
+              width: 1,
+            ),
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    
     // Use Consumer to listen user changes but don't rebuild the entire widget
     return Consumer<UserProvider>(
       builder: (context, userProvider, child) {
         final user = userProvider.user;
 
         return Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(50),
+            preferredSize: const Size.fromHeight(60),
             child: AppBar(
               flexibleSpace: Container(
-                decoration: const BoxDecoration(
-                  gradient: GlobalVariables.appBarGradient,
+                decoration: BoxDecoration(
+                  gradient: themeProvider.getAppBarGradient(context),
                 ),
               ),
-              title: const Text(
+              title: Text(
                 'My Profile',
                 style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
+                  color: themeProvider.isDarkMode ? Colors.white : Colors.black,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
+              iconTheme: IconThemeData(
+                color: themeProvider.isDarkMode ? Colors.white : Colors.black,
+              ),
+              elevation: 0,
             ),
           ),
           body: SingleChildScrollView(
@@ -265,294 +361,236 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     const SizedBox(height: 20),
                     // Avatar Section
-                    Stack(
-                      children: [
-                        GestureDetector(
-                          onTap: _isUploadingAvatar ? null : selectAvatarImage,
-                          child: CircleAvatar(
-                            radius: 60,
-                            backgroundColor: Colors.grey[300],
-                            backgroundImage: _avatarImage != null
-                                ? FileImage(_avatarImage!)
-                                : user.avatar != null && user.avatar!.isNotEmpty
-                                ? NetworkImage(user.avatar!)
-                                : null,
-                            child:
-                                _avatarImage == null &&
-                                    (user.avatar == null ||
-                                        user.avatar!.isEmpty)
-                                ? const Icon(
-                                    Icons.person,
-                                    size: 60,
-                                    color: Colors.grey,
-                                  )
-                                : null,
-                          ),
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).cardColor,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          themeProvider.getCardShadow(context),
+                        ],
+                        border: Border.all(
+                          color: themeProvider.getBorderColor(context),
+                          width: 0.5,
                         ),
-                        if (_isUploadingAvatar)
-                          Positioned.fill(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.5),
-                                shape: BoxShape.circle,
+                      ),
+                      child: Column(
+                        children: [
+                          Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              CircleAvatar(
+                                radius: 60,
+                                backgroundColor: themeProvider.getSurfaceVariantColor(context),
+                                backgroundImage: _avatarImage != null
+                                    ? FileImage(_avatarImage!)
+                                    : user.avatar != null && user.avatar!.isNotEmpty
+                                    ? NetworkImage(user.avatar!)
+                                    : null,
+                                child: _avatarImage == null &&
+                                        (user.avatar == null ||
+                                            user.avatar!.isEmpty)
+                                    ? Icon(
+                                        Icons.person,
+                                        size: 60,
+                                        color: themeProvider.getTextSecondaryColor(context),
+                                      )
+                                    : null,
                               ),
-                              child: const Center(
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
+                              if (_isUploadingAvatar)
+                                Container(
+                                  width: 120,
+                                  height: 120,
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withOpacity(0.5),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Center(
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
                                 ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          TextButton.icon(
+                            onPressed: _isUploadingAvatar ? null : selectAvatarImage,
+                            icon: Icon(
+                              Icons.camera_alt,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            label: Text(
+                              _isUploadingAvatar
+                                  ? 'Selecting...'
+                                  : 'Change profile picture',
+                              style: TextStyle(
+                                color: _isUploadingAvatar 
+                                    ? themeProvider.getTextSecondaryColor(context)
+                                    : Theme.of(context).colorScheme.primary,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    TextButton(
-                      onPressed: _isUploadingAvatar ? null : selectAvatarImage,
-                      child: Text(
-                        _isUploadingAvatar
-                            ? 'Selecting...'
-                            : 'Change profile picture',
-                        style: TextStyle(
-                          color: _isUploadingAvatar ? Colors.grey : Colors.blue,
-                        ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 30),
-                    // Form Fields
+                    const SizedBox(height: 24),
+                    
+                    // Form Fields Container
                     Container(
-                      margin: const EdgeInsets.symmetric(vertical: 5),
-                      child: TextFormField(
-                        controller: _nameController,
-                        enabled: !_isLoading,
-                        decoration: InputDecoration(
-                          labelText: 'Full Name',
-                          hintText: 'Enter your full name',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(
-                              color: Colors.grey,
-                              width: 1,
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(
-                              color: Colors.grey,
-                              width: 1,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(
-                              color: Colors.orange,
-                              width: 2,
-                            ),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                              width: 1,
-                            ),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Name is required';
-                          }
-                          if (value.trim().length < 2) {
-                            return 'Name must be at least 2 characters';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.symmetric(vertical: 5),
-                      child: TextFormField(
-                        controller: _emailController,
-                        enabled: false,
-                        decoration: InputDecoration(
-                          labelText: 'Email',
-                          hintText: 'Email (Read Only)',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(
-                              color: Colors.grey,
-                              width: 1,
-                            ),
-                          ),
-                          disabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(
-                              color: Colors.grey,
-                              width: 1,
-                            ),
-                          ),
-                          filled: true,
-                          fillColor: Colors.grey[100],
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).cardColor,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          themeProvider.getCardShadow(context),
+                        ],
+                        border: Border.all(
+                          color: themeProvider.getBorderColor(context),
+                          width: 0.5,
                         ),
                       ),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.symmetric(vertical: 5),
-                      child: TextFormField(
-                        controller: _phoneController,
-                        enabled: !_isLoading,
-                        keyboardType: TextInputType.phone,
-                        decoration: InputDecoration(
-                          labelText: 'Phone Number',
-                          hintText: 'Enter your phone number',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(
-                              color: Colors.grey,
-                              width: 1,
-                            ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Personal Information',
+                            style: themeProvider.getHeadingStyle(context, fontSize: 18),
                           ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(
-                              color: Colors.grey,
-                              width: 1,
-                            ),
+                          const SizedBox(height: 16),
+                          
+                          // Full Name Field
+                          _buildTextField(
+                            controller: _nameController,
+                            label: 'Full Name',
+                            hint: 'Enter your full name',
+                            themeProvider: themeProvider,
+                            enabled: !_isLoading,
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Name is required';
+                              }
+                              if (value.trim().length < 2) {
+                                return 'Name must be at least 2 characters';
+                              }
+                              return null;
+                            },
                           ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(
-                              color: Colors.orange,
-                              width: 2,
-                            ),
+                          
+                          // Email Field
+                          _buildTextField(
+                            controller: _emailController,
+                            label: 'Email',
+                            hint: 'Email (Read Only)',
+                            themeProvider: themeProvider,
+                            enabled: false,
                           ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                              width: 1,
-                            ),
+                          
+                          // Phone Field
+                          _buildTextField(
+                            controller: _phoneController,
+                            label: 'Phone Number',
+                            hint: 'Enter your phone number',
+                            themeProvider: themeProvider,
+                            enabled: !_isLoading,
+                            keyboardType: TextInputType.phone,
+                            validator: (value) {
+                              if (value != null && value.trim().isNotEmpty) {
+                                String phone = value.trim();
+                                if (phone.length < 10 || phone.length > 15) {
+                                  return 'Phone number must be 10-15 digits';
+                                }
+                                if (!RegExp(r'^[\+]?[0-9\s\-\(\)]+$').hasMatch(phone)) {
+                                  return 'Invalid phone number format';
+                                }
+                              }
+                              return null;
+                            },
                           ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
+                          
+                          // Address Field
+                          _buildTextField(
+                            controller: _addressController,
+                            label: 'Address',
+                            hint: 'Enter your address',
+                            themeProvider: themeProvider,
+                            enabled: !_isLoading,
+                            maxLines: 3,
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Address is required';
+                              }
+                              return null;
+                            },
                           ),
-                        ),
-                        validator: (value) {
-                          if (value != null && value.trim().isNotEmpty) {
-                            String phone = value.trim();
-                            if (phone.length < 10 || phone.length > 15) {
-                              return 'Phone number must be 10-15 digits';
-                            }
-                            if (!RegExp(
-                              r'^[\+]?[0-9\s\-\(\)]+$',
-                            ).hasMatch(phone)) {
-                              return 'Invalid phone number format';
-                            }
-                          }
-                          return null;
-                        },
+                        ],
                       ),
                     ),
-                    Container(
-                      margin: const EdgeInsets.symmetric(vertical: 5),
-                      child: TextFormField(
-                        controller: _addressController,
-                        enabled: !_isLoading,
-                        maxLines: 3,
-                        decoration: InputDecoration(
-                          labelText: 'Address',
-                          hintText: 'Enter your address',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(
-                              color: Colors.grey,
-                              width: 1,
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(
-                              color: Colors.grey,
-                              width: 1,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(
-                              color: Colors.orange,
-                              width: 2,
-                            ),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                              width: 1,
-                            ),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 24),
+                    
+                    // Update Button
                     Container(
                       width: double.infinity,
-                      height: 50,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : updateProfile,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _isLoading
-                              ? Colors.grey
-                              : Colors.orange,
+                              ? themeProvider.getTextTertiaryColor(context)
+                              : Theme.of(context).colorScheme.primary,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          elevation: _isLoading ? 0 : 2,
+                          elevation: 0,
                         ),
                         child: _isLoading
-                            ? const Row(
+                            ? Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   SizedBox(
                                     width: 20,
                                     height: 20,
                                     child: CircularProgressIndicator(
-                                      color: Colors.white,
+                                      color: Theme.of(context).colorScheme.onPrimary,
                                       strokeWidth: 2,
                                     ),
                                   ),
-                                  SizedBox(width: 10),
+                                  const SizedBox(width: 12),
                                   Text(
                                     'Updating...',
                                     style: TextStyle(
-                                      color: Colors.white,
+                                      color: Theme.of(context).colorScheme.onPrimary,
                                       fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                 ],
                               )
-                            : const Text(
+                            : Text(
                                 'Update Profile',
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: Theme.of(context).colorScheme.onPrimary,
                                   fontSize: 16,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                       ),
                     ),
+                    
+                    const SizedBox(height: 24),
                   ],
                 ),
               ),

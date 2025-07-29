@@ -1,11 +1,11 @@
 import 'package:amazon_clone/features/account/services/account_services.dart';
 import 'package:amazon_clone/features/account/widgets/account_button.dart';
-import 'package:amazon_clone/features/livesream/liveStream.dart';
+import 'package:amazon_clone/features/livesream/UserLiveStreamPage.dart';
 import 'package:flutter/material.dart';
 
 class TopButtons extends StatelessWidget {
   const TopButtons({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -40,9 +40,15 @@ class TopButtons extends StatelessWidget {
         Row(
           children: [
             AccountButton(
-              text: 'Live Stream',
+              text: 'Watch Live',
               onTap: () {
-                Navigator.pushNamed(context, LiveStreamHomePage.routeName);
+                // Navigate to User Live Stream Page
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const UserLiveStreamPage(),
+                  ),
+                );
               },
             ),
             AccountButton(text: 'Support', onTap: () {}),
