@@ -265,7 +265,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             fontSize: 16,
           ),
           filled: true,
-          fillColor: enabled 
+          fillColor: enabled
               ? themeProvider.getSurfaceVariantColor(context)
               : themeProvider.getSurfaceVariantColor(context).withOpacity(0.5),
           border: OutlineInputBorder(
@@ -322,7 +322,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
-    
+
     // Use Consumer to listen user changes but don't rebuild the entire widget
     return Consumer<UserProvider>(
       builder: (context, userProvider, child) {
@@ -366,9 +366,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       decoration: BoxDecoration(
                         color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          themeProvider.getCardShadow(context),
-                        ],
+                        boxShadow: [themeProvider.getCardShadow(context)],
                         border: Border.all(
                           color: themeProvider.getBorderColor(context),
                           width: 0.5,
@@ -381,19 +379,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             children: [
                               CircleAvatar(
                                 radius: 60,
-                                backgroundColor: themeProvider.getSurfaceVariantColor(context),
+                                backgroundColor: themeProvider
+                                    .getSurfaceVariantColor(context),
                                 backgroundImage: _avatarImage != null
                                     ? FileImage(_avatarImage!)
-                                    : user.avatar != null && user.avatar!.isNotEmpty
+                                    : user.avatar != null &&
+                                          user.avatar!.isNotEmpty
                                     ? NetworkImage(user.avatar!)
                                     : null,
-                                child: _avatarImage == null &&
+                                child:
+                                    _avatarImage == null &&
                                         (user.avatar == null ||
                                             user.avatar!.isEmpty)
                                     ? Icon(
                                         Icons.person,
                                         size: 60,
-                                        color: themeProvider.getTextSecondaryColor(context),
+                                        color: themeProvider
+                                            .getTextSecondaryColor(context),
                                       )
                                     : null,
                               ),
@@ -416,7 +418,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           const SizedBox(height: 16),
                           TextButton.icon(
-                            onPressed: _isUploadingAvatar ? null : selectAvatarImage,
+                            onPressed: _isUploadingAvatar
+                                ? null
+                                : selectAvatarImage,
                             icon: Icon(
                               Icons.camera_alt,
                               color: Theme.of(context).colorScheme.primary,
@@ -426,8 +430,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ? 'Selecting...'
                                   : 'Change profile picture',
                               style: TextStyle(
-                                color: _isUploadingAvatar 
-                                    ? themeProvider.getTextSecondaryColor(context)
+                                color: _isUploadingAvatar
+                                    ? themeProvider.getTextSecondaryColor(
+                                        context,
+                                      )
                                     : Theme.of(context).colorScheme.primary,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
@@ -438,16 +444,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    
+
                     // Form Fields Container
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          themeProvider.getCardShadow(context),
-                        ],
+                        boxShadow: [themeProvider.getCardShadow(context)],
                         border: Border.all(
                           color: themeProvider.getBorderColor(context),
                           width: 0.5,
@@ -458,10 +462,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           Text(
                             'Personal Information',
-                            style: themeProvider.getHeadingStyle(context, fontSize: 18),
+                            style: themeProvider.getHeadingStyle(
+                              context,
+                              fontSize: 18,
+                            ),
                           ),
                           const SizedBox(height: 16),
-                          
+
                           // Full Name Field
                           _buildTextField(
                             controller: _nameController,
@@ -479,7 +486,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               return null;
                             },
                           ),
-                          
+
                           // Email Field
                           _buildTextField(
                             controller: _emailController,
@@ -488,7 +495,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             themeProvider: themeProvider,
                             enabled: false,
                           ),
-                          
+
                           // Phone Field
                           _buildTextField(
                             controller: _phoneController,
@@ -503,14 +510,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 if (phone.length < 10 || phone.length > 15) {
                                   return 'Phone number must be 10-15 digits';
                                 }
-                                if (!RegExp(r'^[\+]?[0-9\s\-\(\)]+$').hasMatch(phone)) {
+                                if (!RegExp(
+                                  r'^[\+]?[0-9\s\-\(\)]+$',
+                                ).hasMatch(phone)) {
                                   return 'Invalid phone number format';
                                 }
                               }
                               return null;
                             },
                           ),
-                          
+
                           // Address Field
                           _buildTextField(
                             controller: _addressController,
@@ -530,7 +539,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    
+
                     // Update Button
                     Container(
                       width: double.infinity,
@@ -539,7 +548,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primary.withOpacity(0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 4),
                           ),
@@ -564,7 +575,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     width: 20,
                                     height: 20,
                                     child: CircularProgressIndicator(
-                                      color: Theme.of(context).colorScheme.onPrimary,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onPrimary,
                                       strokeWidth: 2,
                                     ),
                                   ),
@@ -572,7 +585,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   Text(
                                     'Updating...',
                                     style: TextStyle(
-                                      color: Theme.of(context).colorScheme.onPrimary,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onPrimary,
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -582,14 +597,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             : Text(
                                 'Update Profile',
                                 style: TextStyle(
-                                  color: Theme.of(context).colorScheme.onPrimary,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimary,
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
                       ),
                     ),
-                    
+
                     const SizedBox(height: 24),
                   ],
                 ),
