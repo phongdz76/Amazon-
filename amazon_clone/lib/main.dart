@@ -40,7 +40,7 @@ class _MyAppState extends State<MyApp> {
       builder: (context, themeProvider, child) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          title: 'Amazon Clone',
+          title: 'Amazon',
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: themeProvider.themeMode,
@@ -51,3 +51,5 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
+
+
