@@ -22,7 +22,7 @@ Full Stack Amazon Clone along with Admin Panel
     - Viewing Orders
     - Changing Order Status
     - Viewing Total Earnings
-    - Viewing Category Based Earnings (on Graph)
+    - Viewing Category Based Earnings
 
 
 
