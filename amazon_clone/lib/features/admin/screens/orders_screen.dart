@@ -87,8 +87,13 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                       topRight: Radius.circular(12),
                                     ),
                                     child: SingelProduct(
-                                      image: orderData.products.isNotEmpty && orderData.products[0].images.isNotEmpty 
-                                          ? orderData.products[0].images[0] 
+                                      image:
+                                          orderData.products.isNotEmpty &&
+                                              orderData
+                                                  .products[0]
+                                                  .images
+                                                  .isNotEmpty
+                                          ? orderData.products[0].images[0]
                                           : '',
                                     ),
                                   ),
@@ -128,10 +133,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
                               padding: const EdgeInsets.all(12.0),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       // Order ID with icon
                                       Row(
@@ -156,9 +163,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                           ),
                                         ],
                                       ),
-                                      
+
                                       const SizedBox(height: 6),
-                                      
+
                                       // Total Price with enhanced styling
                                       if (orderData.totalPrice != null)
                                         Container(
@@ -173,7 +180,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                                 Color(0xFFEE4D2D),
                                               ],
                                             ),
-                                            borderRadius: BorderRadius.circular(6),
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
                                           ),
                                           child: Text(
                                             '\$${orderData.totalPrice.toStringAsFixed(2)}',
@@ -186,7 +195,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                         ),
                                     ],
                                   ),
-                                  
+
                                   // Order date (if available)
                                   if (orderData.orderedAt != null)
                                     Text(
@@ -210,12 +219,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
             ),
           );
   }
-  
+
   String _formatDate(int timestamp) {
     final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
     final now = DateTime.now();
     final difference = now.difference(date).inDays;
-    
+
     if (difference == 0) {
       return 'Today';
     } else if (difference == 1) {
@@ -227,4 +236,3 @@ class _OrdersScreenState extends State<OrdersScreen> {
     }
   }
 }
-

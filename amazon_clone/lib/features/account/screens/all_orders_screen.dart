@@ -117,7 +117,9 @@ class _AllOrdersScreenState extends State<AllOrdersScreen> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    child: order.products.isNotEmpty && order.products[0].images.isNotEmpty
+                    child:
+                        order.products.isNotEmpty &&
+                            order.products[0].images.isNotEmpty
                         ? Image.network(
                             order.products[0].images[0],
                             fit: BoxFit.cover,
@@ -149,9 +151,12 @@ class _AllOrdersScreenState extends State<AllOrdersScreen> {
                                     height: 20,
                                     child: CircularProgressIndicator(
                                       value:
-                                          loadingProgress.expectedTotalBytes != null
-                                          ? loadingProgress.cumulativeBytesLoaded /
-                                                loadingProgress.expectedTotalBytes!
+                                          loadingProgress.expectedTotalBytes !=
+                                              null
+                                          ? loadingProgress
+                                                    .cumulativeBytesLoaded /
+                                                loadingProgress
+                                                    .expectedTotalBytes!
                                           : null,
                                       strokeWidth: 2,
                                       color: Theme.of(context).primaryColor,
@@ -241,7 +246,9 @@ class _AllOrdersScreenState extends State<AllOrdersScreen> {
 
                       // Tên sản phẩm (nếu có)
                       Text(
-                        order.products.isNotEmpty ? order.products[0].name : 'No product',
+                        order.products.isNotEmpty
+                            ? order.products[0].name
+                            : 'No product',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,

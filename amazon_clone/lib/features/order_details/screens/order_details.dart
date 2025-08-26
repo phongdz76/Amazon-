@@ -949,7 +949,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                           ),
                                         ),
                                         child: Text(
-                                          index < widget.order.quantity.length 
+                                          index < widget.order.quantity.length
                                               ? 'Qty: ${widget.order.quantity[index]}'
                                               : 'Qty: 1',
                                           style: TextStyle(
