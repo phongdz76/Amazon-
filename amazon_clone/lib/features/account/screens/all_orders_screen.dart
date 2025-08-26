@@ -117,49 +117,63 @@ class _AllOrdersScreenState extends State<AllOrdersScreen> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    child: Image.network(
-                      order.products[0].images[0],
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).cardColor,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Icon(
-                            Icons.image_not_supported,
-                            color: Theme.of(
-                              context,
-                            ).iconTheme.color?.withOpacity(0.4),
-                            size: 32,
-                          ),
-                        );
-                      },
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).cardColor,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Center(
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                value:
-                                    loadingProgress.expectedTotalBytes != null
-                                    ? loadingProgress.cumulativeBytesLoaded /
-                                          loadingProgress.expectedTotalBytes!
-                                    : null,
-                                strokeWidth: 2,
-                                color: Theme.of(context).primaryColor,
-                              ),
+                    child: order.products.isNotEmpty && order.products[0].images.isNotEmpty
+                        ? Image.network(
+                            order.products[0].images[0],
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).cardColor,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Icon(
+                                  Icons.image_not_supported,
+                                  color: Theme.of(
+                                    context,
+                                  ).iconTheme.color?.withOpacity(0.4),
+                                  size: 32,
+                                ),
+                              );
+                            },
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Container(
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).cardColor,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Center(
+                                  child: SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      value:
+                                          loadingProgress.expectedTotalBytes != null
+                                          ? loadingProgress.cumulativeBytesLoaded /
+                                                loadingProgress.expectedTotalBytes!
+                                          : null,
+                                      strokeWidth: 2,
+                                      color: Theme.of(context).primaryColor,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          )
+                        : Container(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).cardColor,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(
+                              Icons.image_not_supported,
+                              color: Theme.of(
+                                context,
+                              ).iconTheme.color?.withOpacity(0.4),
+                              size: 32,
                             ),
                           ),
-                        );
-                      },
-                    ),
                   ),
                 ),
 
@@ -227,7 +241,7 @@ class _AllOrdersScreenState extends State<AllOrdersScreen> {
 
                       // Tên sản phẩm (nếu có)
                       Text(
-                        order.products[0].name,
+                        order.products.isNotEmpty ? order.products[0].name : 'No product',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,

@@ -87,7 +87,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                       topRight: Radius.circular(12),
                                     ),
                                     child: SingelProduct(
-                                      image: orderData.products[0].images[0],
+                                      image: orderData.products.isNotEmpty && orderData.products[0].images.isNotEmpty 
+                                          ? orderData.products[0].images[0] 
+                                          : '',
                                     ),
                                   ),
                                 ),

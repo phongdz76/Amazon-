@@ -389,11 +389,13 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
     try {
       for (int i = 0; i < widget.order.products.length; i++) {
-        for (int j = 0; j < widget.order.quantity[i]; j++) {
-          productDetailsService.addToCart(
-            context: context,
-            product: widget.order.products[i],
-          );
+        if (i < widget.order.quantity.length) {
+          for (int j = 0; j < widget.order.quantity[i]; j++) {
+            productDetailsService.addToCart(
+              context: context,
+              product: widget.order.products[i],
+            );
+          }
         }
       }
 
@@ -947,7 +949,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                           ),
                                         ),
                                         child: Text(
-                                          'Qty: ${widget.order.quantity[index]}',
+                                          index < widget.order.quantity.length 
+                                              ? 'Qty: ${widget.order.quantity[index]}'
+                                              : 'Qty: 1',
                                           style: TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.w500,
